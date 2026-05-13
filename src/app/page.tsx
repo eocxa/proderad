@@ -1,65 +1,46 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, User, Building2 } from "lucide-react";
 
-export default function Home() {
+export default function PortalPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-bg-light flex items-center justify-center p-6">
+      <div className="max-w-4xl w-full">
+        <div className="text-center mb-16">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+             <svg className="w-10 h-10 fill-white" viewBox="0 0 24 24">
+                <path d="M12,2C10.89,2 10,2.89 10,4V5C10,6.11 10.89,7 12,7C13.11,7 14,6.11 14,5V4C14,2.89 13.11,2 12,2M16.5,10L14,8H10L7.5,10L6,12V19C6,20.11 6.89,21 8,21H16C17.11,21 18,20.11 18,19V12L16.5,10Z" />
+             </svg>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-text-main font-outfit mb-4">Bienvenido a ProDental</h1>
+          <p className="text-text-muted text-lg">Selecciona el portal que mejor se adapte a tus necesidades</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Patient Portal */}
+          <Link href="/consultorio" className="group bg-white p-10 rounded-[32px] border-2 border-transparent hover:border-primary transition-all shadow-xl hover:shadow-primary/20 flex flex-col items-center text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-8 group-hover:bg-primary transition-colors">
+              <User className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+            </div>
+            <h2 className="text-2xl font-bold text-text-main mb-4 font-outfit">Agendar Cita (Pacientes)</h2>
+            <p className="text-text-muted mb-8 leading-relaxed">Agenda una cita, conoce nuestros servicios y especialistas para cuidar tu sonrisa.</p>
+            <div className="flex items-center gap-2 text-primary font-bold group-hover:gap-4 transition-all">
+              Ir al Consultorio <ArrowRight className="w-5 h-5" />
+            </div>
+          </Link>
+
+          {/* Doctor Portal */}
+          <Link href="/renta-consultorios" className="group bg-white p-10 rounded-[32px] border-2 border-transparent hover:border-cta transition-all shadow-xl hover:shadow-cta/20 flex flex-col items-center text-center">
+            <div className="w-20 h-20 bg-cta/10 rounded-3xl flex items-center justify-center mb-8 group-hover:bg-cta transition-colors">
+              <Building2 className="w-10 h-10 text-cta group-hover:text-white transition-colors" />
+            </div>
+            <h2 className="text-2xl font-bold text-text-main mb-4 font-outfit">Soy Profesional (Renta)</h2>
+            <p className="text-text-muted mb-8 leading-relaxed">Renta espacios dentales equipados y profesionales para atender a tus pacientes.</p>
+            <div className="flex items-center gap-2 text-cta font-bold group-hover:gap-4 transition-all">
+              Ver Consultorios <ArrowRight className="w-5 h-5" />
+            </div>
+          </Link>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
