@@ -21,13 +21,15 @@ const KNOWLEDGE_BASE = {
   location: ['donde', 'ubicacion', 'mapa', 'llegar', 'direccion', 'estan', 'sucursal', 'cerquita', 'lejos'],
   rental: ['renta', 'alquiler', 'rentar', 'doctor', 'profesional', 'consultorio', 'espacio dental', 'trabajar', 'chamba', 'ocupo', 'rentame'],
   affirmation: ['si', 'va', 'arre', 'vale', 'simon', 'dale', 'porfa', 'okay', 'ok', 'estaria bien'],
-  negation: ['no', 'despues', 'luego', 'paso', 'nada', 'ninguno']
+  negation: ['no', 'despues', 'luego', 'paso', 'nada', 'ninguno'],
+  human: ['asesor', 'humano', 'persona', 'operador', 'alguien', 'contacto', 'telefono', 'llamar']
 };
 
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [currentState, setCurrentState] = useState<ChatState>('START');
+  const [fallbackCount, setFallbackCount] = useState(0);
   const [messages, setMessages] = useState<Message[]>([
     { 
       role: 'bot', 
@@ -132,23 +134,34 @@ export const Chatbot = () => {
     const isGreeting = hasIntent('greetings');
     const isYes = hasIntent('affirmation');
     const isPrice = cleanText.includes('precio') || cleanText.includes('costo') || cleanText.includes('cuanto') || cleanText.includes('vale');
+    const isHuman = hasIntent('human');
 
     // 2. Lógica Basada en Estado Actual (Contexto)
     if (currentState === 'RENTAL_EXPLORATION' && isYes) {
+      setFallbackCount(0);
       handleAction('ACTION_RENTAL');
       return;
     }
     if (currentState === 'LOCATION_INTENT' && isYes) {
+      setFallbackCount(0);
       handleAction('INTENT_LOCATION');
       return;
     }
     if (currentState === 'BOOKING_INTENT' && isYes) {
+      setFallbackCount(0);
       handleAction('INTENT_BOOKING');
       return;
     }
 
     // 3. Resolución de Intenciones
+    if (isHuman) {
+      setFallbackCount(0);
+      handleAction('INTENT_HUMAN');
+      return;
+    }
+
     if (isBooking) {
+      setFallbackCount(0);
       addBotMessage("¡Claro! Entiendo que quieres mejorar tu sonrisa. La valoración inicial es gratuita. ¿Te gustaría ver los horarios disponibles?", [
         { label: '📅 Ver horarios', action: 'INTENT_BOOKING' },
         { label: '💰 Ver precios', action: 'INTENT_SERVICES' }
@@ -157,6 +170,7 @@ export const Chatbot = () => {
     }
 
     if (isRental) {
+      setFallbackCount(0);
       addBotMessage("Contamos con consultorios equipados en Polanco, ideales para especialistas. La renta incluye recepción y servicios. ¿Deseas ir a la sección de profesionales?", [
         { label: '🏢 Ver disponibilidad', action: 'ACTION_RENTAL' },
         { label: '📞 Contacto directo', action: 'INTENT_HUMAN' }
@@ -165,6 +179,7 @@ export const Chatbot = () => {
     }
 
     if (isLocation) {
+      setFallbackCount(0);
       addBotMessage("Estamos en Polanco, en Av. Principal #123. Muy cerca de todo. ¿Quieres que te abra el mapa para ver cómo llegar?", [
         { label: '📍 Abrir Mapa', action: 'INTENT_LOCATION' }
       ], 'LOCATION_INTENT');
@@ -172,6 +187,7 @@ export const Chatbot = () => {
     }
 
     if (isPrice) {
+      setFallbackCount(0);
       addBotMessage("Nuestros precios: Limpieza ($600), Valoración (Gratis), Blanqueamiento ($2,500). ¿Te gustaría agendar una cita para alguno?", [
         { label: '🗓️ Agendar Cita', action: 'INTENT_BOOKING' }
       ], 'SERVICE_EXPLORATION');
@@ -179,16 +195,23 @@ export const Chatbot = () => {
     }
 
     if (isGreeting) {
-      addBotMessage("¡Hola! Soy ProBot. Puedo ayudarte con citas, precios, nuestra ubicación o renta de consultorios. ¿Qué necesitas?");
+      setFallbackCount(0);
+      addBotMessage("¡Hola! Soy DentiBot. Puedo ayudarte con citas, precios, nuestra ubicación o renta de consultorios. ¿Qué necesitas?");
       return;
     }
 
     // Fallback Inteligente
-    addBotMessage("Mmm, no estoy seguro de haber entendido eso último, pero puedo ayudarte con citas, precios o nuestra ubicación. ¿Cuál de estos te interesa?", [
-      { label: '🗓️ Agendar Cita', action: 'INTENT_BOOKING' },
-      { label: '📍 Ubicación', action: 'INTENT_LOCATION' },
-      { label: '💰 Precios', action: 'INTENT_SERVICES' }
-    ]);
+    if (fallbackCount >= 1) {
+      setFallbackCount(0);
+      handleAction('INTENT_HUMAN');
+    } else {
+      setFallbackCount(prev => prev + 1);
+      addBotMessage("Mmm, no estoy seguro de haber entendido eso último, pero puedo ayudarte con citas, precios o nuestra ubicación. ¿Cuál de estos te interesa?", [
+        { label: '🗓️ Agendar Cita', action: 'INTENT_BOOKING' },
+        { label: '📍 Ubicación', action: 'INTENT_LOCATION' },
+        { label: '💰 Precios', action: 'INTENT_SERVICES' }
+      ]);
+    }
   };
 
   const handleAction = (action: string) => {
@@ -211,7 +234,7 @@ export const Chatbot = () => {
         ], 'BOOKING_INTENT');
         break;
       case 'INTENT_HUMAN':
-        addBotMessage("Nuestro horario es de Lun-Vie (9am-8pm). Puedes llamarnos al +52 55 1234 5678.");
+        addBotMessage("Por favor, espera un momento para que un asesor te conecte, o si lo prefieres, comunícate a nuestro número de contacto: +52 55 1234 5678.");
         break;
       default:
         addBotMessage("Ocurrió un error en la navegación. ¿Deseas que intente llevarte al inicio?", [
@@ -222,16 +245,39 @@ export const Chatbot = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-[100]">
+      {/* Tooltip Indicador */}
+      {!isOpen && (
+        <div 
+          onClick={() => setIsOpen(true)}
+          className="absolute -top-12 right-2 animate-bounce cursor-pointer flex flex-col items-center group"
+        >
+          <div className="bg-white text-primary text-[13px] font-bold px-4 py-2 rounded-2xl shadow-xl border border-primary/10 whitespace-nowrap group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+            ¡Hazme una pregunta!
+          </div>
+          <div className="absolute -bottom-1.5 right-8 w-3 h-3 bg-white border-b border-r border-primary/10 transform rotate-45 group-hover:bg-primary transition-colors duration-300"></div>
+        </div>
+      )}
+
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-500 transform hover:scale-110 active:scale-95 group overflow-hidden",
-          isOpen ? "bg-white text-text-main" : "bg-primary text-white"
+          "flex items-center justify-center transition-transform duration-300 transform hover:scale-110 active:scale-95 relative z-10",
+          isOpen ? "w-16 h-16 rounded-full bg-white text-text-main shadow-2xl overflow-hidden group" : "w-[120px] bg-transparent outline-none border-none shadow-none"
         )}
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-        {isOpen ? <X className="w-8 h-8 relative z-10" /> : <MessageCircle className="w-8 h-8 relative z-10 group-hover:animate-pulse" />}
+        {isOpen ? (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <X className="w-8 h-8 relative z-10" />
+          </>
+        ) : (
+          <img 
+            src="/chatbot-icon.png" 
+            alt="Abrir chat" 
+            className="w-full h-auto drop-shadow-[0_10px_15px_rgba(0,0,0,0.2)] object-contain"
+          />
+        )}
       </button>
 
       {/* Chat Window */}
@@ -239,16 +285,15 @@ export const Chatbot = () => {
         <div className="absolute bottom-20 right-0 w-[360px] md:w-[420px] h-[600px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-500">
           {/* Header */}
           <div className="bg-gradient-to-br from-primary via-primary-dark to-secondary p-6 text-white relative">
-             <div className="absolute top-0 right-0 p-4 opacity-20"><Sparkles className="w-12 h-12" /></div>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/30">
-                <Bot className="w-7 h-7" />
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-white/50">
+                <img src="/chatbot-icon.png" alt="DentiBot" className="w-10 h-10 object-contain drop-shadow-sm" />
               </div>
               <div>
-                <h3 className="font-outfit font-bold text-lg leading-tight tracking-tight">ProBot Expert</h3>
+                <h3 className="font-outfit font-bold text-lg leading-tight tracking-tight">DentiBot</h3>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
-                  <span className="text-[10px] text-white/80 font-bold uppercase tracking-widest">IA Health Assistant</span>
+                  <span className="text-[10px] text-white/80 font-bold uppercase tracking-widest">Asistente IA</span>
                 </div>
               </div>
             </div>
