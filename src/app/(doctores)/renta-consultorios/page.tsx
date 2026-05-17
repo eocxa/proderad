@@ -1,88 +1,257 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import { motion } from "motion/react";
+import Link from "next/link";
+import { ChevronRight, Star, Wifi, ShieldCheck, Microscope, MapPin, Phone, Mail } from "lucide-react";
+import { MapSection } from "@/components/sections/Map";
+import RegistrationModal from "@/components/profesionales/RegistrationModal";
+import DemoModal from "@/components/profesionales/DemoModal";
+import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Building2, Clock, Shield } from "lucide-react";
-import { RentalBookingSystem } from "@/components/sections/RentalBookingSystem";
-import Link from "next/link";
 
-const FEATURES = [
-  { icon: Building2, title: "Totalmente Equipados", desc: "Unidades dentales modernas, rayos X digital y equipo de esterilización de primer nivel." },
-  { icon: Clock, title: "Flexibilidad de Horario", desc: "Renta por hora, medio turno o día completo según las necesidades de tu práctica." },
-  { icon: Shield, title: "Ubicación & Seguridad", desc: "Zona de alta plusvalía con seguridad 24/7, recepción y estacionamiento para tus pacientes." },
+const CATEGORIES = [
+  {
+    id: "general",
+    name: "General",
+    count: 12,
+    img: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=400",
+  },
+  {
+    id: "fisioterapia",
+    name: "Fisioterapia",
+    count: 8,
+    img: "https://images.unsplash.com/photo-1576091160550-217359f4ecf8?auto=format&fit=crop&q=80&w=400",
+  },
+  {
+    id: "pediatric",
+    name: "Odontopediatría",
+    count: 5,
+    img: "https://images.unsplash.com/photo-1588776814222-2608d434af3e?auto=format&fit=crop&q=80&w=400",
+  },
+  {
+    id: "psicologia",
+    name: "Psicología",
+    count: 9,
+    img: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=400",
+  },
 ];
 
-export default function RentaPage() {
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) { entry.target.classList.add('visible'); }
-      });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('#renta-hero .reveal, .reveal-scale').forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+const FEATURED = [
+  {
+    id: "1",
+    name: "Penthouse Clinic",
+    rating: 4.9,
+    reviews: 120,
+    price: 120,
+    tags: ["Rayos X 3D", "Esterilización Pro", "Parking"],
+    img: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800",
+    featured: true,
+    wifi: true,
+  },
+  {
+    id: "2",
+    name: "The Zen Studio",
+    price: 85,
+    tagline: "Certificado de Bioseguridad",
+    icon: ShieldCheck,
+    img: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=400",
+  },
+  {
+    id: "3",
+    name: "TechHub Polanco",
+    price: 95,
+    tagline: "Microscopio quirúrgico",
+    icon: Microscope,
+    img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=400",
+  },
+];
+
+export default function Home() {
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   return (
-    <main>
+    <main className="bg-surface min-h-screen">
       <Navbar />
-      
-      {/* Hero */}
-      <section id="renta-hero" className="pt-32 pb-20 lg:pb-28 bg-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] border-[60px] border-slate-50/50 rounded-full translate-x-1/4 -translate-y-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-64 h-64 border-[2px] border-primary/[0.03] rounded-full pointer-events-none" />
+      <div className="pb-20 pt-20">
+      {/* Hero Section */}
+      <header className="relative min-h-[85vh] flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&q=80&w=1600"
+            alt="Luxury Office"
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/50 to-transparent" />
+        </div>
 
-        <div className="container mx-auto px-6 lg:px-12 relative">
-          <div className="max-w-3xl">
-            <div className="reveal">
-              <div className="inline-flex items-center gap-4 mb-8">
-                <div className="w-16 h-[1px] bg-cta/40" />
-                <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-cta/60">Portal profesional</span>
-              </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-24">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-2xl text-white"
+          >
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight">
+              Eleva tu Práctica en Espacios de Élite
+            </h1>
+            <p className="text-lg md:text-xl opacity-80 mb-12 max-w-lg font-medium leading-relaxed">
+              Consultorios dentales premium equipados con tecnología de vanguardia, diseñados para especialistas exigentes.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => {
+                  const el = document.getElementById("categorias");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="bg-secondary-container text-on-secondary-container px-10 py-5 rounded-2xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-secondary-container/20"
+              >
+                Explorar Espacios
+              </button>
             </div>
-            <div className="reveal">
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit mb-8">
-                El espacio perfecto<br />
-                para tu <span className="text-cta/80">práctica</span>
-              </h1>
-            </div>
-            <div className="reveal">
-              <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-8 lg:mb-10 font-light max-w-xl">
-                Consultorios dentales de alta gama totalmente equipados. Recepción, esterilización y todos los servicios incluidos para que te enfoques únicamente en tus pacientes.
-              </p>
-            </div>
-            <div className="reveal">
-              <Link href="#renta-form" className="bg-cta text-white px-8 py-4 rounded-2xl font-semibold text-sm hover:bg-cta-dark transition-all shadow-xl shadow-cta/10 inline-flex items-center gap-2">
-                Consultar disponibilidad
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-              </Link>
+          </motion.div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-24 space-y-32">
+        {/* Categories */}
+        <section id="categorias">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <span className="text-secondary font-bold text-xs uppercase tracking-[0.2em] block mb-3">Especialidades</span>
+              <h2 className="text-4xl font-bold text-primary tracking-tight">Categorías</h2>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Features */}
-      <section className="py-20 bg-slate-50/50">
-        <div className="container mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger">
-            {FEATURES.map((feat, i) => (
-              <div key={i} className="reveal-scale bg-white p-8 rounded-[36px] border border-gray-50 hover:border-cta/5 hover:shadow-2xl hover:shadow-slate-200/10 hover:-translate-y-2 transition-all duration-500">
-                <div className="w-14 h-14 bg-cta/[0.06] rounded-2xl flex items-center justify-center mb-6 group-hover:bg-cta transition-colors">
-                  <feat.icon className="text-cta w-7 h-7" />
+          <div className="flex gap-6 overflow-x-auto no-scrollbar pb-8 -mx-4 px-4 md:mx-0 md:px-0">
+            {CATEGORIES.map((cat, i) => (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="flex-none w-72 group cursor-pointer"
+                onClick={() => {
+                  const el = document.getElementById("nuestros-espacios");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                <div className="relative h-80 rounded-3xl overflow-hidden mb-6 bg-surface-container">
+                  <img
+                    src={cat.img}
+                    alt={cat.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-primary/20 group-hover:bg-primary/0 transition-colors" />
                 </div>
-                <h3 className="font-outfit font-bold text-xl mb-4 text-text-main">{feat.title}</h3>
-                <p className="text-text-muted text-sm leading-relaxed">{feat.desc}</p>
-              </div>
+                <h3 className="text-2xl font-bold text-primary mb-2">{cat.name}</h3>
+                <p className="text-outline font-medium text-sm">{cat.count} Espacios disponibles</p>
+              </motion.div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <div className="reveal-scale">
-        <RentalBookingSystem />
+        {/* Mosaic Listings */}
+        <section id="nuestros-espacios">
+          <div className="max-w-xl mb-16">
+            <span className="text-secondary font-bold text-xs uppercase tracking-[0.2em] block mb-3">Tu Próximo Consultorio</span>
+            <h2 className="text-5xl font-bold text-primary tracking-tight mb-6">Nuestros Espacios</h2>
+            <p className="text-outline text-lg font-medium leading-relaxed">
+              Descubre espacios diseñados específicamente para tu especialidad. Elige una categoría y reserva hoy mismo.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {CATEGORIES.map((cat, i) => (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -10 }}
+                className="group relative rounded-[2.5rem] overflow-hidden border border-outline-variant/30 bg-white shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col"
+              >
+                <Link href={`/renta-consultorios/details/${cat.id}`} className="flex-1 flex flex-col">
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={cat.img}
+                      alt={cat.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="p-8 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-bold text-primary tracking-tight">Consultorio {cat.name}</h3>
+                      <div className="flex items-center gap-1 text-secondary">
+                        <Star size={14} fill="currentColor" />
+                        <span className="text-xs font-bold">4.9</span>
+                      </div>
+                    </div>
+                    <div className="mt-auto pt-6 border-t border-outline-variant/20 flex items-center justify-between">
+                      <p className="text-primary font-bold">
+                        $120 <span className="text-xs font-normal text-outline">/ hora</span>
+                      </p>
+                      <button className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center group-hover:bg-secondary transition-colors">
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA / Membership Section */}
+        <section className="bg-primary rounded-[3rem] p-12 md:p-24 relative overflow-hidden text-center">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+            <div className="absolute w-full h-full bg-[radial-gradient(circle_at_50%_50%,#50d9fe_0,transparent_50%)]" />
+          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="relative z-10 max-w-3xl mx-auto"
+          >
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-8 tracking-tight">
+              Únete a nosotros para poder acceder a nuestros consultorios profesionales
+            </h2>
+            <p className="text-white/70 text-lg mb-12 leading-relaxed font-bold italic">
+              Registro necesario para poder reservar un consultorio
+            </p>
+            <div className="flex flex-col md:flex-row justify-center gap-6">
+              <button 
+                onClick={() => setIsRegisterOpen(true)}
+                className="bg-secondary-container text-on-secondary-container px-12 py-5 rounded-2xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-2xl shadow-black/20"
+              >
+                Registrarme
+              </button>
+              <button 
+                onClick={() => setIsDemoOpen(true)}
+                className="bg-white/10 text-white border border-white/20 backdrop-blur-md px-12 py-5 rounded-2xl font-bold hover:bg-white/20 active:scale-95 transition-all"
+              >
+                Agendar Demo
+              </button>
+            </div>
+          </motion.div>
+        </section>
+
+      </main>
+
+      <MapSection />
+
+      <RegistrationModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+      <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} categories={CATEGORIES} />
       </div>
       <Footer />
     </main>
   );
 }
+

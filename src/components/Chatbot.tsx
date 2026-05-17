@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Bot, Calendar, MapPin, Building2, User, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Calendar, MapPin, Building2, User, Sparkles, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PROCESS_DOCS, EXTENDED_KB } from '@/lib/dentibot-kb';
 
 // --- CONFIGURACIÓN DEL MOTOR DE IA LOCAL ---
 
-type ChatState = 'START' | 'SERVICE_EXPLORATION' | 'BOOKING_INTENT' | 'RENTAL_EXPLORATION' | 'LOCATION_INTENT';
+type ChatState = 'START' | 'SERVICE_EXPLORATION' | 'BOOKING_INTENT' | 'RENTAL_EXPLORATION' | 'LOCATION_INTENT' | 'DOCS_HELP';
 
 interface Message {
   role: 'bot' | 'user';
@@ -117,7 +118,6 @@ export const Chatbot = () => {
     const cleanText = advancedNormalize(rawText);
     const words = cleanText.split(' ');
 
-    // Función para detectar si alguna palabra del usuario se parece a nuestras keywords
     const hasIntent = (category: keyof typeof KNOWLEDGE_BASE) => {
       return words.some(word => 
         KNOWLEDGE_BASE[category].some(keyword => {
@@ -127,7 +127,16 @@ export const Chatbot = () => {
       );
     };
 
-    // 1. Detección de Intenciones Globales (Fuzzy)
+    const hasExtendedIntent = (category: keyof typeof EXTENDED_KB) => {
+      return words.some(word => 
+        EXTENDED_KB[category].some(keyword => {
+          const normKeyword = advancedNormalize(keyword);
+          return word.includes(normKeyword) || getSimilarity(word, normKeyword) > 0.8;
+        })
+      );
+    };
+
+    // 1. Detección de Intenciones Globales
     const isBooking = hasIntent('booking') || cleanText.includes('blanqueamiento') || cleanText.includes('blaquiamiento');
     const isLocation = hasIntent('location');
     const isRental = hasIntent('rental');
@@ -136,7 +145,10 @@ export const Chatbot = () => {
     const isPrice = cleanText.includes('precio') || cleanText.includes('costo') || cleanText.includes('cuanto') || cleanText.includes('vale');
     const isHuman = hasIntent('human');
 
-    // 2. Lógica Basada en Estado Actual (Contexto)
+    const isProcessHelp = hasExtendedIntent('process_help');
+    const isErrorHelp = hasExtendedIntent('error_help') || cleanText.includes('falla') || cleanText.includes('no avanza') || cleanText.includes('invalido');
+
+    // 2. Lógica Basada en Estado Actual
     if (currentState === 'RENTAL_EXPLORATION' && isYes) {
       setFallbackCount(0);
       handleAction('ACTION_RENTAL');
@@ -160,6 +172,82 @@ export const Chatbot = () => {
       return;
     }
 
+    // A) AYUDA DE PROCESOS / PASO A PASO
+    if (isProcessHelp) {
+      setFallbackCount(0);
+      
+      // ¿Es sobre rentar consultorios?
+      if (words.some(w => EXTENDED_KB.rental_help.includes(w)) || cleanText.includes('rent')) {
+        addBotMessage(
+          `🏢 **Proceso para Rentar un Consultorio:**\n\n` +
+          `1. Ve a **'Soy Profesional'** en el menú.\n` +
+          `2. Elige tu tipo de espacio y pulsa en su ficha.\n` +
+          `3. Elige plan (**Hora, Día, Mes, Año**) y servicios adicionales (Rayos X, Asistente, Autoclave).\n` +
+          `4. Pulsa **'Reservar Ahora'** y completa los 3 pasos del formulario (Días/Horas, tus datos, y método de pago).`,
+          [
+            { label: 'Ir a Renta de Consultorios', action: 'ACTION_RENTAL' },
+            { label: 'Ayuda con errores de formulario', action: 'HELP_ERRORS' }
+          ],
+          'DOCS_HELP'
+        );
+        return;
+      }
+      
+      // ¿Es sobre agendar citas de pacientes?
+      if (words.some(w => EXTENDED_KB.booking_help.includes(w)) || cleanText.includes('cita')) {
+        addBotMessage(
+          `🦷 **Proceso para Agendar una Cita Dental:**\n\n` +
+          `1. Entra a la sección de citas (inicio de la web).\n` +
+          `2. Selecciona el servicio (Limpieza, Valoración, Ortodoncia, etc.).\n` +
+          `3. Selecciona tu día y hora disponibles en el calendario.\n` +
+          `4. Llena tus datos de contacto y pulsa en 'Agendar'.`,
+          [
+            { label: 'Ir a Agendar Cita', action: 'INTENT_BOOKING' },
+            { label: 'Ver Precios de Servicios', action: 'INTENT_SERVICES' }
+          ],
+          'DOCS_HELP'
+        );
+        return;
+      }
+      
+      // Ayuda genérica de procesos
+      addBotMessage(
+        "¿De qué proceso necesitas ayuda o documentación?",
+        [
+          { label: 'Rentar Consultorio (Doctores)', action: 'HELP_RENT_PROCESS' },
+          { label: 'Agendar Cita (Pacientes)', action: 'HELP_BOOK_PROCESS' }
+        ],
+        'DOCS_HELP'
+      );
+      return;
+    }
+
+    // B) AYUDA CON ERRORES O DIFICULTADES
+    if (isErrorHelp) {
+      setFallbackCount(0);
+      
+      let errorDetail = PROCESS_DOCS.errores.no_avanza_formulario;
+      if (cleanText.includes('telefono') || cleanText.includes('celular') || cleanText.includes('tel')) {
+        errorDetail = PROCESS_DOCS.errores.telefono_invalido;
+      } else if (cleanText.includes('cedula') || cleanText.includes('identificacion') || cleanText.includes('id')) {
+        errorDetail = PROCESS_DOCS.errores.cedula_invalida;
+      } else if (cleanText.includes('correo') || cleanText.includes('email') || cleanText.includes('mail')) {
+        errorDetail = PROCESS_DOCS.errores.correo_invalido;
+      } else if (cleanText.includes('mapa') || cleanText.includes('map')) {
+        errorDetail = PROCESS_DOCS.errores.mapa_no_carga;
+      }
+      
+      addBotMessage(
+        `🛠️ **Guía de Solución de Problemas:**\n\n${errorDetail}\n\n*Recuerda que el formulario cuenta con sanitización estricta de seguridad anti-hackeos.*`,
+        [
+          { label: 'Volver a intentar', action: 'ACTION_RENTAL' },
+          { label: 'Hablar con un asesor', action: 'INTENT_HUMAN' }
+        ],
+        'DOCS_HELP'
+      );
+      return;
+    }
+
     if (isBooking) {
       setFallbackCount(0);
       addBotMessage("¡Claro! Entiendo que quieres mejorar tu sonrisa. La valoración inicial es gratuita. ¿Te gustaría ver los horarios disponibles?", [
@@ -180,7 +268,7 @@ export const Chatbot = () => {
 
     if (isLocation) {
       setFallbackCount(0);
-      addBotMessage("Estamos en Polanco, en Av. Principal #123. Muy cerca de todo. ¿Quieres que te abra el mapa para ver cómo llegar?", [
+      addBotMessage("Estamos en Av. la Teja 66, Coapa, Narciso Mendoza, Tlalpan, 14390 CDMX. ¿Quieres que te abra el mapa para ver cómo llegar?", [
         { label: 'Abrir Mapa', action: 'INTENT_LOCATION' }
       ], 'LOCATION_INTENT');
       return;
@@ -188,9 +276,17 @@ export const Chatbot = () => {
 
     if (isPrice) {
       setFallbackCount(0);
-      addBotMessage("Nuestros precios: Limpieza ($600), Valoración (Gratis), Blanqueamiento ($2,500). ¿Te gustaría agendar una cita para alguno?", [
-        { label: 'Agendar Cita', action: 'INTENT_BOOKING' }
-      ], 'SERVICE_EXPLORATION');
+      addBotMessage(
+        `💰 **Nuestras tarifas:**\n\n` +
+        `🦷 **Clínica:** Limpieza ($600), Valoración (Gratis), Blanqueamiento ($2,500).\n` +
+        `🏢 **Renta:** Hora ($120), Día ($1,200), Mes ($30,000), Anual ($300,000).\n` +
+        `➕ **Servicios Extra:** Desde $30/hora (Autoclave) hasta $100/hora (Asistente).`,
+        [
+          { label: 'Ver Renta Consultorios', action: 'ACTION_RENTAL' },
+          { label: 'Agendar Cita Dental', action: 'INTENT_BOOKING' }
+        ],
+        'SERVICE_EXPLORATION'
+      );
       return;
     }
 
@@ -226,7 +322,7 @@ export const Chatbot = () => {
         break;
       case 'ACTION_RENTAL':
         addBotMessage("Cargando portal de profesionales y calendario de renta...");
-        setTimeout(() => { window.location.href = '/renta-consultorios#renta-form'; }, 1000);
+        setTimeout(() => { window.location.href = '/renta-consultorios'; }, 1000);
         break;
       case 'INTENT_SERVICES':
         addBotMessage("Nuestros precios son competitivos: Limpieza $600, Ortodoncia desde $12,000. ¿Agendamos una valoración gratuita?", [
@@ -234,7 +330,43 @@ export const Chatbot = () => {
         ], 'BOOKING_INTENT');
         break;
       case 'INTENT_HUMAN':
-        addBotMessage("Por favor, espera un momento para que un asesor te conecte, o si lo prefieres, comunícate a nuestro número de contacto: +52 55 1234 5678.");
+        addBotMessage("Por favor, espera un momento para que un asesor te conecte, o si lo prefieres, comunícate a nuestro número de contacto: +52 55 5673 9186.");
+        break;
+      case 'HELP_RENT_PROCESS':
+        addBotMessage(
+          `🏢 **Proceso para Rentar un Consultorio:**\n\n` +
+          `1. Ve a **'Soy Profesional'** en el menú.\n` +
+          `2. Elige tu tipo de espacio y pulsa en su ficha.\n` +
+          `3. Elige plan (**Hora, Día, Mes, Año**) y adicionales.\n` +
+          `4. Pulsa **'Reservar Ahora'** y completa los 3 pasos del formulario.`,
+          [
+            { label: 'Ir a Renta de Consultorios', action: 'ACTION_RENTAL' }
+          ]
+        );
+        break;
+      case 'HELP_BOOK_PROCESS':
+        addBotMessage(
+          `🦷 **Proceso para Agendar una Cita Dental:**\n\n` +
+          `1. Entra a la sección de citas (inicio de la web).\n` +
+          `2. Selecciona el servicio (Limpieza, Valoración, Ortodoncia, etc.).\n` +
+          `3. Selecciona tu día y hora disponibles.\n` +
+          `4. Llena tus datos de contacto y pulsa en 'Agendar'.`,
+          [
+            { label: 'Ir a Agendar Cita', action: 'INTENT_BOOKING' }
+          ]
+        );
+        break;
+      case 'HELP_ERRORS':
+        addBotMessage(
+          `🛠️ **Dificultades comunes:**\n\n` +
+          `- **Teléfono:** Solo escribe 10 números sin espacios ni guiones.\n` +
+          `- **Cédula:** Debe tener exactamente 8 números.\n` +
+          `- **Correo:** No acepta correos de prueba falsos.\n` +
+          `- **Botón Siguiente deshabilitado:** Revisa que ningún campo falte ni tenga un formato inválido.`,
+          [
+            { label: 'Hablar con un asesor', action: 'INTENT_HUMAN' }
+          ]
+        );
         break;
       default:
         addBotMessage("Ocurrió un error en la navegación. ¿Deseas que intente llevarte al inicio?", [

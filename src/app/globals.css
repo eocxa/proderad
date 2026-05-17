@@ -10,6 +10,19 @@
   --color-text-main: #0f172a;
   --color-text-muted: #475569;
 
+  /* Nuevos colores para el módulo de profesionales (diseño importado) */
+  --color-primary-container: #002b45;
+  --color-on-primary-container: #7293b2;
+  --color-secondary-container: #50d9fe;
+  --color-on-secondary-container: #005c70;
+  --color-surface: #f7f9fb;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-outline: #73777e;
+  --color-outline-variant: #c2c7ce;
+
   --font-outfit: var(--font-outfit);
   --font-work-sans: var(--font-work-sans);
 }

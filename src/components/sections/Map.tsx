@@ -1,7 +1,31 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import { MapPin, Phone, Clock } from 'lucide-react';
 
 export const MapSection = () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const section = document.getElementById('ubicacion');
+    if (section) {
+      section
+        .querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale')
+        .forEach((el) => observer.observe(el));
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section id="ubicacion" className="py-32 lg:py-40 bg-white relative overflow-hidden">
       <div className="absolute top-0 left-0 w-[250px] lg:w-[500px] h-[250px] lg:h-[500px] bg-primary/[0.01] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
@@ -49,16 +73,23 @@ export const MapSection = () => {
                   </div>
                 </div>
               </div>
-              <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer"
-                className="mt-10 glass-dark text-white py-4 px-8 rounded-2xl font-semibold text-center hover:bg-white/10 transition-all text-sm border border-white/10">
+              <a
+                href="https://maps.google.com/maps?q=Av.+la+Teja+66,+Narciso+Mendoza,+Tlalpan,+14390+CDMX,+Mexico"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-10 glass-dark text-white py-4 px-8 rounded-2xl font-semibold text-center hover:bg-white/10 transition-all text-sm border border-white/10"
+              >
                 Cómo llegar →
               </a>
             </div>
             <div className="flex-1 h-[300px] lg:h-[550px] relative">
-              <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3765.345873289!2d-99.1311!3d19.2991!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85ce013111111111%3A0x1111111111111111!2sAv.%20la%20Teja%2066%2C%20Coapa%2C%20Narciso%20Mendoza%2C%20Tlalpan%2C%2014390%20CDMX!5e0!3m2!1ses!2smx!4v1715690000000!5m2!1ses!2smx" 
+              <iframe
+                src="https://maps.google.com/maps?q=Av.+la+Teja+66,+Narciso+Mendoza,+Tlalpan,+14390+CDMX,+Mexico&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 className="absolute inset-0 w-full h-full border-0 grayscale invert contrast-75 brightness-110 opacity-75"
-                allowFullScreen loading="lazy" />
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
           </div>
         </div>
