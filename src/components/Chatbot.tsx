@@ -36,9 +36,9 @@ export const Chatbot = () => {
       text: '¡Hola! Qué gusto saludarte. Soy el asistente de ProDental. ¿En qué te puedo apoyar hoy?',
       type: 'options',
       options: [
-        { label: '🦷 Agendar una Cita', action: 'INTENT_BOOKING' },
-        { label: '📍 Ver Ubicación', action: 'INTENT_LOCATION' },
-        { label: '💰 Precios y Servicios', action: 'INTENT_SERVICES' }
+        { label: 'Agendar una Cita', action: 'INTENT_BOOKING' },
+        { label: 'Ver Ubicación', action: 'INTENT_LOCATION' },
+        { label: 'Precios y Servicios', action: 'INTENT_SERVICES' }
       ]
     }
   ]);
@@ -163,8 +163,8 @@ export const Chatbot = () => {
     if (isBooking) {
       setFallbackCount(0);
       addBotMessage("¡Claro! Entiendo que quieres mejorar tu sonrisa. La valoración inicial es gratuita. ¿Te gustaría ver los horarios disponibles?", [
-        { label: '📅 Ver horarios', action: 'INTENT_BOOKING' },
-        { label: '💰 Ver precios', action: 'INTENT_SERVICES' }
+        { label: 'Ver horarios', action: 'INTENT_BOOKING' },
+        { label: 'Ver precios', action: 'INTENT_SERVICES' }
       ], 'BOOKING_INTENT');
       return;
     }
@@ -172,8 +172,8 @@ export const Chatbot = () => {
     if (isRental) {
       setFallbackCount(0);
       addBotMessage("Contamos con consultorios equipados en Polanco, ideales para especialistas. La renta incluye recepción y servicios. ¿Deseas ir a la sección de profesionales?", [
-        { label: '🏢 Ver disponibilidad', action: 'ACTION_RENTAL' },
-        { label: '📞 Contacto directo', action: 'INTENT_HUMAN' }
+        { label: 'Ver disponibilidad', action: 'ACTION_RENTAL' },
+        { label: 'Contacto directo', action: 'INTENT_HUMAN' }
       ], 'RENTAL_EXPLORATION');
       return;
     }
@@ -181,7 +181,7 @@ export const Chatbot = () => {
     if (isLocation) {
       setFallbackCount(0);
       addBotMessage("Estamos en Polanco, en Av. Principal #123. Muy cerca de todo. ¿Quieres que te abra el mapa para ver cómo llegar?", [
-        { label: '📍 Abrir Mapa', action: 'INTENT_LOCATION' }
+        { label: 'Abrir Mapa', action: 'INTENT_LOCATION' }
       ], 'LOCATION_INTENT');
       return;
     }
@@ -189,7 +189,7 @@ export const Chatbot = () => {
     if (isPrice) {
       setFallbackCount(0);
       addBotMessage("Nuestros precios: Limpieza ($600), Valoración (Gratis), Blanqueamiento ($2,500). ¿Te gustaría agendar una cita para alguno?", [
-        { label: '🗓️ Agendar Cita', action: 'INTENT_BOOKING' }
+        { label: 'Agendar Cita', action: 'INTENT_BOOKING' }
       ], 'SERVICE_EXPLORATION');
       return;
     }
@@ -207,9 +207,9 @@ export const Chatbot = () => {
     } else {
       setFallbackCount(prev => prev + 1);
       addBotMessage("Mmm, no estoy seguro de haber entendido eso último, pero puedo ayudarte con citas, precios o nuestra ubicación. ¿Cuál de estos te interesa?", [
-        { label: '🗓️ Agendar Cita', action: 'INTENT_BOOKING' },
-        { label: '📍 Ubicación', action: 'INTENT_LOCATION' },
-        { label: '💰 Precios', action: 'INTENT_SERVICES' }
+        { label: 'Agendar Cita', action: 'INTENT_BOOKING' },
+        { label: 'Ubicación', action: 'INTENT_LOCATION' },
+        { label: 'Precios', action: 'INTENT_SERVICES' }
       ]);
     }
   };
@@ -230,7 +230,7 @@ export const Chatbot = () => {
         break;
       case 'INTENT_SERVICES':
         addBotMessage("Nuestros precios son competitivos: Limpieza $600, Ortodoncia desde $12,000. ¿Agendamos una valoración gratuita?", [
-          { label: '🗓️ Sí, agendar', action: 'INTENT_BOOKING' }
+          { label: 'Sí, agendar', action: 'INTENT_BOOKING' }
         ], 'BOOKING_INTENT');
         break;
       case 'INTENT_HUMAN':
@@ -238,7 +238,7 @@ export const Chatbot = () => {
         break;
       default:
         addBotMessage("Ocurrió un error en la navegación. ¿Deseas que intente llevarte al inicio?", [
-          { label: '🏠 Volver al inicio', action: 'GO_HOME' }
+          { label: 'Volver al inicio', action: 'GO_HOME' }
         ]);
     }
   };
@@ -282,7 +282,7 @@ export const Chatbot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 w-[360px] md:w-[420px] h-[600px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-500">
+        <div className="absolute bottom-20 right-0 w-[calc(100vw-32px)] max-w-[420px] h-[600px] max-h-[calc(100vh-120px)] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-500">
           {/* Header */}
           <div className="bg-gradient-to-br from-primary via-primary-dark to-secondary p-6 text-white relative">
             <div className="flex items-center gap-4">

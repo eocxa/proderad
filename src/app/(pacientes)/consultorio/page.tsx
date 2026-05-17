@@ -4,9 +4,11 @@ import { Hero } from "@/components/sections/Hero";
 import { Services } from "@/components/sections/Services";
 import { About } from "@/components/sections/About";
 import { Team } from "@/components/sections/Team";
+import { Reviews } from "@/components/sections/Reviews";
 import { BookingSystem } from "@/components/sections/BookingSystem";
 import { Gallery } from "@/components/sections/Gallery";
 import { MapSection } from "@/components/sections/Map";
+import { ProfessionalCTA } from "@/components/sections/ProfessionalCTA";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -23,7 +25,9 @@ export default function ConsultorioPage() {
       <About />
       <Gallery />
       <Team />
+      <Reviews />
       <BookingSystem />
+      <ProfessionalCTA />
       <MapSection />
       <Footer />
     </main>

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0EA5E9",
+  themeColor: "#1e3a5f",
 };
 
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
@@ -39,7 +39,7 @@ export default function RootLayout({
         workSans.variable
       )}>
         <GoogleAnalytics />
-        {children}
+        <div className="overflow-x-hidden">{children}</div>
         <Chatbot />
       </body>
     </html>

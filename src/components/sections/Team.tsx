@@ -1,45 +1,54 @@
-import React from 'react';
+"use client";
 
-const doctors = [
-  {
-    name: "Dr. Roberto Méndez",
-    role: "Ortodoncista Senior",
-    desc: "Especialista en alineación invisible y casos complejos con más de 15 años de trayectoria.",
-  },
-  {
-    name: "Dra. Elena Vargas",
-    role: "Implantología & Estética",
-    desc: "Experta en rehabilitación oral y diseño de sonrisa mediante tecnología digital 3D.",
-  },
-  {
-    name: "Dr. Carlos Ruiz",
-    role: "Endodoncista",
-    desc: "Dedicado a la preservación dental mediante tratamientos de conductos sin dolor.",
-  }
+import React, { useEffect } from 'react';
+
+const DOCTORS = [
+  { name: "Dr. Roberto Méndez", role: "Ortodoncista", exp: "15+ años de experiencia", desc: "Especialista en alineación invisible y tratamientos complejos con tecnología 3D." },
+  { name: "Dra. Elena Vargas", role: "Implantología & Estética", exp: "12+ años de experiencia", desc: "Rehabilitación oral y diseño de sonrisa mediante planificación digital." },
+  { name: "Dr. Carlos Ruiz", role: "Endodoncista", exp: "10+ años de experiencia", desc: "Preservación dental con técnicas de conducto sin dolor y microscopio." },
 ];
 
 export const Team = () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('#equipo .reveal-scale').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section id="equipo" className="py-24 bg-white">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="text-primary font-bold tracking-widest uppercase text-xs">Nuestro Staff</span>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-text-main mt-3 mb-4 font-outfit">Especialistas de Confianza</h2>
-          <p className="text-text-muted max-w-2xl mx-auto leading-relaxed">
-            Contamos con un equipo de profesionales apasionados por la salud dental y en constante formación académica.
-          </p>
+    <section id="equipo" className="py-32 lg:py-40 bg-white relative overflow-hidden">
+      <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-2xl mb-20 reveal">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-[2px] bg-primary/60" />
+            <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-primary/60">Equipo médico</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit">
+            Especialistas<br />
+            <span className="text-primary/15">certificados</span>
+          </h2>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {doctors.map((doc, idx) => (
-            <div key={idx} className="group rounded-3xl overflow-hidden border border-gray-100 bg-gray-50 hover:bg-white hover:border-primary hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="h-72 bg-gradient-to-b from-blue-100 to-blue-200 flex items-center justify-center relative overflow-hidden">
-                <svg className="w-24 h-24 fill-primary/30 group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><path d="M12,2A5,5 0 0,1 17,7A5,5 0 0,1 12,12A5,5 0 0,1 7,7A5,5 0 0,1 12,2M12,14C17.5,14 22,16.24 22,19V22H2V19C2,16.24 6.5,14 12,14Z" /></svg>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger">
+          {DOCTORS.map((doc, i) => (
+            <div key={i} className="reveal-scale group relative pt-20">
+              {/* Avatar circle overlapping top of card */}
+              <div className="absolute top-0 left-6 z-10 w-28 h-28 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border-[5px] border-white shadow-xl flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl transition-all duration-500">
+                <span className="font-outfit font-black text-2xl text-primary/30 group-hover:text-primary/50 transition-colors">
+                  {doc.name.split(' ').slice(1).map(n => n[0]).join('')}
+                </span>
               </div>
-              <div className="p-8">
-                <h3 className="text-xl font-bold text-text-main mb-1 font-outfit">{doc.name}</h3>
-                <div className="text-primary text-xs font-bold uppercase tracking-wider mb-4">{doc.role}</div>
-                <p className="text-text-muted text-sm leading-relaxed">{doc.desc}</p>
+
+              {/* Card */}
+              <div className="bg-white rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 pt-16 sm:pt-20 border border-gray-50 hover:shadow-2xl hover:shadow-slate-200/20 hover:-translate-y-2 transition-all duration-500 h-full">
+                <h3 className="font-outfit font-bold text-xl text-text-main mb-1">{doc.name}</h3>
+                <p className="text-primary font-semibold text-sm mb-2">{doc.role}</p>
+                <p className="text-xs text-text-muted font-medium mb-4">{doc.exp}</p>
+                <p className="text-text-muted text-sm leading-relaxed border-t border-gray-50 pt-4">{doc.desc}</p>
               </div>
             </div>
           ))}

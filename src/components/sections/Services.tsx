@@ -1,62 +1,77 @@
-import React from 'react';
-import { Sparkles, ShieldCheck, Microscope, HeartPulse, Smile, Activity } from 'lucide-react';
+"use client";
 
-const services = [
-  {
-    title: "Ortodoncia Avanzada",
-    desc: "Alineamos tu sonrisa con las técnicas más modernas, desde brackets estéticos hasta alineadores invisibles.",
-    icon: Sparkles,
-  },
-  {
-    title: "Implantes Dentales",
-    desc: "Recupera la funcionalidad y estética de tu boca con implantes de alta durabilidad y apariencia natural.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Diseño de Sonrisa",
-    desc: "Transformamos tu expresión facial mediante carillas y blanqueamiento dental de última generación.",
-    icon: Smile,
-  },
-  {
-    title: "Endodoncia",
-    desc: "Salvaguardamos tus piezas dentales naturales eliminando infecciones y dolor de forma segura.",
-    icon: HeartPulse,
-  },
-  {
-    title: "Periodoncia",
-    desc: "Cuidado especializado de tus encías para prevenir la pérdida de piezas y asegurar una base sólida.",
-    icon: Activity,
-  },
-  {
-    title: "Odontopediatría",
-    desc: "Atención cálida y profesional para los más pequeños, creando una base positiva para su salud dental.",
-    icon: Microscope,
-  }
+import React, { useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
+
+const SERVICES = [
+  { num: "01", title: "Ortodoncia", desc: "Alineación invisible y brackets estéticos con tecnología 3D.", stat: "1,500+" },
+  { num: "02", title: "Implantes", desc: "Implantes de titanio con coronas de porcelana. Rehabilitación completa.", stat: "800+" },
+  { num: "03", title: "Estética Dental", desc: "Carillas, blanqueamiento láser y diseño de sonrisa digital.", stat: "3,200+" },
+  { num: "04", title: "Endodoncia", desc: "Tratamientos de conducto con microscopio. Técnicas sin dolor.", stat: "1,100+" },
+  { num: "05", title: "Periodoncia", desc: "Cuidado de encías, limpieza profunda y prevención de enfermedades.", stat: "2,000+" },
+  { num: "06", title: "Odontopediatría", desc: "Atención especializada para niños en un ambiente cálido y seguro.", stat: "900+" },
 ];
 
 export const Services = () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('#servicios .reveal, #servicios .reveal-left, #servicios .reveal-right, #servicios .reveal-scale').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section id="servicios" className="py-24 bg-white">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="text-primary font-bold tracking-widest uppercase text-xs">Excelencia Médica</span>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-text-main mt-3 mb-4 font-outfit">Tratamientos Especializados</h2>
-          <p className="text-text-muted max-w-2xl mx-auto leading-relaxed">
-            Ofrecemos una gama completa de servicios odontológicos utilizando tecnología de vanguardia para garantizar los mejores resultados.
-          </p>
+    <section id="servicios" className="py-32 lg:py-40 bg-white relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-[300px] lg:w-[600px] h-[300px] lg:h-[600px] border-[40px] lg:border-[80px] border-slate-50/50 rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[200px] lg:w-[400px] h-[200px] lg:h-[400px] border-[20px] lg:border-[40px] border-slate-50/30 rounded-full -translate-x-1/4 translate-y-1/4 pointer-events-none" />
+
+      <div className="container mx-auto px-6 lg:px-12 relative">
+        {/* Section header */}
+        <div className="flex flex-col lg:flex-row lg:items-end gap-6 mb-20">
+          <div className="reveal flex-1">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-[2px] bg-secondary/60" />
+              <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-secondary/60">Especialidades clínicas</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit">
+              Nuestros<br />
+              <span className="text-primary/15">servicios</span>
+            </h2>
+          </div>
+          <div className="reveal lg:pb-4">
+            <p className="text-base sm:text-lg text-text-muted leading-relaxed max-w-md font-light">
+              Servicios odontológicos integrales con tecnología de diagnóstico 3D y protocolos certificados.
+            </p>
+          </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, idx) => (
-            <div key={idx} className="group p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:border-primary hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:to-secondary transition-all">
-                <service.icon className="w-7 h-7 text-primary group-hover:text-white transition-colors" />
+
+        {/* Services grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {SERVICES.map((s, i) => (
+            <div key={i} className={`reveal-scale group relative bg-white rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 border border-gray-50 hover:border-primary/5 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/20 ${i % 2 === 0 ? 'lg:translate-y-0' : 'lg:translate-y-6'}`}>
+              {/* Number */}
+              <div className="flex items-start justify-between mb-8">
+                <span className="font-outfit font-black text-3xl sm:text-5xl text-primary/[0.06] group-hover:text-primary/[0.12] transition-colors duration-500 select-none">
+                  {s.num}
+                </span>
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-500 shadow-sm">
+                  <ArrowRight className="w-5 h-5 text-primary/40 group-hover:text-white transition-colors group-hover:-rotate-45" />
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-text-main mb-3 font-outfit">{service.title}</h3>
-              <p className="text-text-muted text-sm leading-relaxed mb-6">{service.desc}</p>
-              <button className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider group-hover:gap-3 transition-all">
-                Saber más <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-              </button>
+
+              <h3 className="font-outfit font-bold text-xl text-text-main mb-3">{s.title}</h3>
+              <p className="text-text-muted text-sm leading-relaxed mb-8">{s.desc}</p>
+
+              <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+                <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Casos tratados</span>
+                <span className="font-outfit font-black text-lg text-primary">{s.stat}</span>
+              </div>
+
+              <a href="#citas" className="absolute inset-0" aria-label={`Agendar ${s.title}`} />
             </div>
           ))}
         </div>
