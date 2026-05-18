@@ -33,6 +33,10 @@ export async function middleware(request: NextRequest) {
 
   if (!pathname.startsWith("/api/")) return NextResponse.next()
 
+  if (pathname.startsWith("/api/google") || pathname.startsWith("/api/auth/google")) {
+    return NextResponse.next()
+  }
+
   const isPublicGet = publicRoutes.some((r) => matchesPath(pathname, r)) && method === "GET"
   const isPublicPost =
     publicRoutes.some((r) => matchesPath(pathname, r)) && method === "POST"
