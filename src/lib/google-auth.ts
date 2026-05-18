@@ -30,6 +30,8 @@ export interface GoogleTokens {
   token_type: string;
   expiry_date: number; // Timestamp ms
   calendar_id?: string;
+  client_id?: string;
+  client_secret?: string;
 }
 
 export function saveTokens(tokens: GoogleTokens) {
