@@ -3,15 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { es } from 'date-fns/locale';
-import { format, isSameDay } from 'date-fns';
+import { format } from 'date-fns';
 import 'react-day-picker/dist/style.css';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, Calendar as CalendarIcon, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Calendar as CalendarIcon, ShieldCheck, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import type { Office } from '@/types';
 
-const MOCK_RENTED = [
-  { date: new Date(), time: 'mañana' },
-  { date: new Date(), time: 'tarde' },
-];
+const SHIFT_MAP: Record<string, string> = { 'mañana': 'morning', 'tarde': 'afternoon', 'completo': 'full' };
 
 const RENTAL_SLOTS = [
   { id: 'mañana', label: 'Turno Mañana', time: '9:00 AM – 2:00 PM' },
@@ -22,14 +20,52 @@ const RENTAL_SLOTS = [
 export const RentalBookingSystem = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [selectedOffice, setSelectedOffice] = useState<string>('');
+  const [offices, setOffices] = useState<Office[]>([]);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ doctorName: '', email: '', specialty: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => { setSelectedSlot(null); }, [selectedDate]);
 
-  const isSlotOccupied = (slotId: string) => {
-    if (!selectedDate) return false;
-    return MOCK_RENTED.some(rent => isSameDay(rent.date, selectedDate) && rent.time === slotId);
+  useEffect(() => {
+    fetch('/api/offices')
+      .then(r => r.json())
+      .then(res => { if (res.success && res.data) { setOffices(res.data); if (res.data.length > 0 && !selectedOffice) setSelectedOffice(res.data[0].id); } })
+      .catch(() => {});
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!selectedDate || !selectedSlot || !formData.doctorName || !formData.email || !selectedOffice) return;
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const res = await fetch('/api/rentals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          office_id: selectedOffice,
+          doctor_name: formData.doctorName,
+          doctor_email: formData.email,
+          doctor_specialty: formData.specialty || undefined,
+          dates: [dateStr],
+          shift: SHIFT_MAP[selectedSlot] || selectedSlot,
+          notes: `Turno: ${selectedSlot}`,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStep(3);
+      } else {
+        setSubmitError(data.error?.message || 'Error al crear la reserva. Intenta de nuevo.');
+      }
+    } catch {
+      setSubmitError('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,7 +83,6 @@ export const RentalBookingSystem = () => {
 
         <div className="max-w-6xl mx-auto">
           <div className="glass rounded-[40px] shadow-2xl shadow-slate-200/10 overflow-hidden flex flex-col lg:flex-row">
-            {/* Sidebar */}
             <div className="lg:w-[400px] w-full shrink-0 bg-gradient-to-br from-cta to-cta-dark p-8 sm:p-10 lg:p-12 text-white flex flex-col">
               <h3 className="text-2xl font-bold font-outfit mb-2">Área de doctores</h3>
               <p className="text-white/50 text-sm mb-10">Consultorios equipados con recepción, esterilización y todos los servicios incluidos.</p>
@@ -69,7 +104,6 @@ export const RentalBookingSystem = () => {
               </div>
             </div>
 
-            {/* Content */}
             <div className="flex-1 p-6 sm:p-8 lg:p-12">
               {step === 1 && (
                 <div className="animate-in fade-in slide-in-from-right-5 duration-300">
@@ -80,33 +114,39 @@ export const RentalBookingSystem = () => {
                         Fecha de renta
                       </h4>
 <div className="rdp-wrapper">
-                       <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} locale={es} disabled={{ before: new Date() }} className="rdp-compact" />
-                     </div>
+                        <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} locale={es} disabled={{ before: new Date() }} className="rdp-compact" />
+                      </div>
                     </div>
                     <div className="flex-1">
                       <h4 className="font-outfit font-bold text-lg mb-6 flex items-center gap-3">
                         <span className="w-8 h-8 rounded-xl bg-cta/10 text-cta flex items-center justify-center text-xs font-bold">2</span>
-                        Turno
+                        Consultorio y turno
                       </h4>
+                      {offices.length > 0 && (
+                        <div className="mb-4">
+                          <label className="block text-xs font-semibold text-text-muted mb-2">Consultorio</label>
+                          <select value={selectedOffice} onChange={e => setSelectedOffice(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cta/10 outline-hidden text-sm text-text-main">
+                            {offices.map(o => <option key={o.id} value={o.id}>{o.name} — ${o.price_per_hour.toLocaleString('es-MX')}/hr</option>)}
+                            <option value="">Selecciona un consultorio</option>
+                          </select>
+                        </div>
+                      )}
                       <div className="space-y-3">
-                        {RENTAL_SLOTS.map((slot) => {
-                          const occupied = isSlotOccupied(slot.id);
-                          return (
-                            <button key={slot.id} disabled={occupied} onClick={() => setSelectedSlot(slot.id)}
-                              className={cn("w-full p-4 rounded-2xl text-left transition-all border flex justify-between items-center",
-                                occupied ? "bg-gray-50 border-transparent opacity-40 cursor-not-allowed" :
-                                selectedSlot === slot.id ? "bg-white border-cta shadow-lg shadow-cta/10" :
-                                "bg-white border-gray-100 hover:border-cta hover:bg-gray-50")}>
-                              <div>
-                                <p className={cn("font-semibold text-sm", selectedSlot === slot.id ? "text-cta" : "text-text-main")}>{slot.label}</p>
-                                <p className="text-[10px] text-text-muted mt-0.5">{slot.time}</p>
-                              </div>
-                              {selectedSlot === slot.id && <div className="w-2 h-2 bg-cta rounded-full" />}
-                            </button>
-                          );
-                        })}
+                        {RENTAL_SLOTS.map((slot) => (
+                          <button key={slot.id} onClick={() => setSelectedSlot(slot.id)}
+                            className={cn("w-full p-4 rounded-2xl text-left transition-all border flex justify-between items-center",
+                              selectedSlot === slot.id ? "bg-white border-cta shadow-lg shadow-cta/10" :
+                              "bg-white border-gray-100 hover:border-cta hover:bg-gray-50")}>
+                            <div>
+                              <p className={cn("font-semibold text-sm", selectedSlot === slot.id ? "text-cta" : "text-text-main")}>{slot.label}</p>
+                              <p className="text-[10px] text-text-muted mt-0.5">{slot.time}</p>
+                            </div>
+                            {selectedSlot === slot.id && <div className="w-2 h-2 bg-cta rounded-full" />}
+                          </button>
+                        ))}
                       </div>
-                      <button disabled={!selectedDate || !selectedSlot} onClick={() => setStep(2)}
+                      <button disabled={!selectedDate || !selectedSlot || !selectedOffice} onClick={() => setStep(2)}
                         className="w-full mt-8 bg-cta text-white py-4 rounded-2xl font-semibold hover:bg-cta-dark transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-cta/10 inline-flex items-center justify-center gap-2">
                         Continuar <ArrowRight className="w-4 h-4" />
                       </button>
@@ -119,7 +159,10 @@ export const RentalBookingSystem = () => {
                 <div className="max-w-md mx-auto animate-in fade-in slide-in-from-right-5 duration-300 py-6">
                   <h4 className="font-outfit font-bold text-2xl text-text-main mb-2">Tus datos</h4>
                   <p className="text-text-muted text-sm mb-8">Validaremos tu perfil y confirmaremos la renta.</p>
-                  <form onSubmit={(e) => { e.preventDefault(); setStep(3); }} className="space-y-5">
+                  {submitError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">{submitError}</div>
+                  )}
+                  <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-5">
                     <div>
                       <label className="block text-xs font-semibold text-text-muted mb-2">Nombre del doctor</label>
                       <input type="text" required className="w-full px-5 py-3.5 rounded-xl border border-gray-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cta/10 outline-hidden text-sm" value={formData.doctorName} onChange={e => setFormData({...formData, doctorName: e.target.value})} placeholder="Dr. Nombre" />
@@ -136,7 +179,9 @@ export const RentalBookingSystem = () => {
                       <button type="button" onClick={() => setStep(1)} className="flex-1 py-4 font-semibold text-text-muted hover:text-text-main transition-colors text-sm inline-flex items-center justify-center gap-2">
                         <ArrowLeft className="w-4 h-4" /> Volver
                       </button>
-                      <button type="submit" className="flex-[2] bg-cta text-white py-4 rounded-2xl font-semibold shadow-lg shadow-cta/10 hover:bg-cta-dark transition-all text-sm">Confirmar reserva</button>
+                      <button type="submit" disabled={submitting} className="flex-[2] bg-cta text-white py-4 rounded-2xl font-semibold shadow-lg shadow-cta/10 hover:bg-cta-dark transition-all text-sm inline-flex items-center justify-center gap-2 disabled:opacity-50">
+                        {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</> : 'Confirmar reserva'}
+                      </button>
                     </div>
                   </form>
                 </div>
@@ -151,7 +196,7 @@ export const RentalBookingSystem = () => {
                   <p className="text-text-muted max-w-xs mb-10 text-sm leading-relaxed">
                     Dr/a. <span className="font-bold text-text-main">{formData.doctorName}</span>, validaremos su perfil y confirmaremos su espacio.
                   </p>
-                  <button onClick={() => setStep(1)} className="bg-slate-100 text-text-main px-8 py-3 rounded-2xl font-semibold hover:bg-slate-200 transition-all text-sm">Nueva solicitud</button>
+                  <button onClick={() => { setStep(1); setSelectedSlot(null); setFormData({ doctorName: '', email: '', specialty: '' }); }} className="bg-slate-100 text-text-main px-8 py-3 rounded-2xl font-semibold hover:bg-slate-200 transition-all text-sm">Nueva solicitud</button>
                 </div>
               )}
             </div>

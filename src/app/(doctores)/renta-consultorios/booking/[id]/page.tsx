@@ -4,11 +4,13 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronLeft, Check, ArrowRight, MessageCircle } from "lucide-react";
+import { ChevronLeft, Check, ArrowRight, MessageCircle, Loader2 } from "lucide-react";
 
 import CalendarPicker from "@/components/booking/CalendarPicker";
 import BookingForm, { isFormValid, type FormData, type FormErrors } from "@/components/booking/BookingForm";
 import BookingSummary from "@/components/booking/BookingSummary";
+
+const SHIFT_MAP: Record<string, string> = { hora: "morning", "día": "afternoon", mes: "full", anual: "full" };
 
 const STEP_TITLES = ["Seleccionar Fecha", "Información del Profesional", "Resumen y Pago"];
 
@@ -27,6 +29,8 @@ function BookingContent() {
 
   /* ── Estado ─────────────────────────────────────────────── */
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [selection, setSelection] = useState<{
     dates: Date[]; startDate: Date | null; endDate: Date | null; time: string;
@@ -51,9 +55,40 @@ function BookingContent() {
     return false;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 3) {
-      paymentMethod === "whatsapp" ? setShowWhatsApp(true) : alert("Procesando pago seguro…");
+      if (paymentMethod === "whatsapp") {
+        setShowWhatsApp(true);
+        return;
+      }
+      setSubmitting(true);
+      setSubmitError("");
+      try {
+        const dateStr = selection.startDate ? selection.startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        const res = await fetch('/api/rentals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            office_id: (id as string) || '',
+            doctor_name: formData.name,
+            doctor_email: formData.email,
+            doctor_specialty: `Cédula: ${formData.cedula}`,
+            dates: [dateStr],
+            shift: SHIFT_MAP[plan] || 'morning',
+            notes: `Plan: ${plan}, Teléfono: ${formData.phone}, Método de pago: ${paymentMethod}`,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setShowWhatsApp(true);
+        } else {
+          setSubmitError(data.error?.message || 'Error al procesar la reserva.');
+        }
+      } catch {
+        setSubmitError('Error de conexión. Intenta de nuevo.');
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
     setStep(s => s + 1);
@@ -142,15 +177,19 @@ function BookingContent() {
       </main>
 
       {/* Barra de acción fija */}
+      {submitError && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-red-50 border border-red-200 rounded-xl px-6 py-3 text-red-700 text-sm font-medium max-w-md">
+          {submitError}
+        </div>
+      )}
       <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-outline-variant/30 px-4 py-5 z-50">
         <div className="max-w-md mx-auto">
           <button
             onClick={handleNext}
-            disabled={!isStepValid()}
+            disabled={!isStepValid() || submitting}
             className="w-full h-16 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-4 hover:brightness-110 active:scale-95 transition-all shadow-2xl shadow-primary/20 disabled:opacity-40 disabled:grayscale disabled:scale-100"
           >
-            <span>{step === 3 ? "Confirmar Reserva" : "Siguiente Paso"}</span>
-            <ArrowRight size={20}/>
+            {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Procesando...</> : <><span>{step === 3 ? "Confirmar Reserva" : "Siguiente Paso"}</span><ArrowRight size={20}/></>}
           </button>
         </div>
       </div>

@@ -5,10 +5,10 @@ import { X, Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight, M
 interface DemoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  categories: { id: string, name: string }[];
+  offices: { id: string; name: string }[];
 }
 
-export default function DemoModal({ isOpen, onClose, categories }: DemoModalProps) {
+export default function DemoModal({ isOpen, onClose, offices }: DemoModalProps) {
   const [submitted, setSubmitted] = useState(false);
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -18,11 +18,38 @@ export default function DemoModal({ isOpen, onClose, categories }: DemoModalProp
     phone: ""
   });
 
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
   const dates = Array.from({ length: 14 }, (_, i) => i + 1);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/webhooks/n8n", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "demo_request",
+          ...formData,
+          selectedCategory,
+          selectedDate,
+        }),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        setError("Error al agendar la visita. Intenta de nuevo.");
+      }
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const isFormValid = formData.name && formData.email && formData.phone && selectedCategory && selectedDate;
@@ -58,6 +85,12 @@ export default function DemoModal({ isOpen, onClose, categories }: DemoModalProp
                     <h2 className="text-3xl font-extrabold text-primary tracking-tight mb-2">Agendar Visita</h2>
                     <p className="text-outline text-sm">Conoce nuestras instalaciones de primera mano.</p>
                   </div>
+
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-medium">
+                      {error}
+                    </div>
+                  )}
 
                   <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Professional Info */}
@@ -104,7 +137,7 @@ export default function DemoModal({ isOpen, onClose, categories }: DemoModalProp
                         <MapPin size={12} className="text-secondary" /> Especialidad de interés
                       </label>
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                        {categories.map((cat) => (
+                        {offices.map((cat) => (
                           <button
                             key={cat.id}
                             type="button"
@@ -159,10 +192,10 @@ export default function DemoModal({ isOpen, onClose, categories }: DemoModalProp
 
                     <button 
                       type="submit" 
-                      disabled={!isFormValid}
-                      className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 disabled:opacity-50 disabled:grayscale"
+                      disabled={!isFormValid || submitting}
+                      className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 disabled:opacity-50 disabled:grayscale flex items-center justify-center"
                     >
-                      Agendar Visita
+                      {submitting ? "Agendando..." : "Agendar Visita"}
                     </button>
                   </form>
                 </div>

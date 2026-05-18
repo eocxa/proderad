@@ -7,13 +7,12 @@ const sanitize = (v: string) =>
   v.replace(/['";\\]/g, "")
    .replace(/--/g, "")
    .replace(/\/\*/g, "")
-   .replace(/\*\//g, "")
-   .replace(/\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|TRUNCATE|SCRIPT)\b/gi, "");
+   .replace(/\*\//g, "");
 
 /* ── Validadores ─────────────────────────────────────────── */
 const BAD_DOMAINS = ["test.com","example.com","mail.com","fake.com","temp.com","correo.com","test.test"];
 
-const vName   = (v:string) => !v.trim() ? "El nombre es requerido" : v.trim().length<3 ? "Nombre muy corto" : !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.]+$/.test(v) ? "Solo letras y espacios" : "";
+const vName   = (v:string) => !v.trim() ? "El nombre es requerido" : v.trim().length<3 ? "Nombre muy corto" : "";
 const vPhone  = (v:string) => { const d=v.replace(/\D/g,""); return !d?"El teléfono es requerido":d.length!==10?"Debe tener exactamente 10 dígitos":""; };
 const vEmail  = (v:string) => {
   if (!v) return "El correo es requerido";
@@ -21,7 +20,7 @@ const vEmail  = (v:string) => {
   if (BAD_DOMAINS.includes(v.split("@")[1]?.toLowerCase())) return "Usa un correo electrónico real";
   return "";
 };
-const vCedula = (v:string) => !v?"La cédula es requerida":/^\d{8}$/.test(v)?"":"Debe tener exactamente 8 dígitos numéricos";
+const vCedula = (v:string) => !v?"La cédula es requerida":/^\d{7,12}$/.test(v)?"":"Debe tener entre 7 y 12 dígitos numéricos";
 
 export interface FormData { name:string; phone:string; email:string; cedula:string; }
 export interface FormErrors { name:string; phone:string; email:string; cedula:string; }
@@ -90,8 +89,8 @@ export default function BookingForm({ value, onChange, errors, onErrors }: Props
             onChange={e=>handle("name",e.target.value)}/>
         </Field>
 
-        <Field label="Cédula Profesional (8 dígitos)" icon={Contact} error={errors.cedula}>
-          <input type="text" inputMode="numeric" maxLength={8} className={`${baseInput} ${errors.cedula?errInput:""}`}
+        <Field label="Cédula Profesional (7-12 dígitos)" icon={Contact} error={errors.cedula}>
+          <input type="text" inputMode="numeric" maxLength={12} className={`${baseInput} ${errors.cedula?errInput:""}`}
             placeholder="12345678" value={value.cedula}
             onChange={e=>handle("cedula",e.target.value.replace(/\D/g,""))}/>
         </Field>

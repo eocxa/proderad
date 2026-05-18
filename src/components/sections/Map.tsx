@@ -72,7 +72,7 @@ export const MapSection = () => {
                     <p className="text-white/50 text-sm">+52 55 5673 9186</p>
                   </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden border border-white/10">
+                <div className="rounded-2xl overflow-hidden border border-white/10 lg:hidden">
                   <iframe
                     src="https://maps.google.com/maps?q=Av.+la+Teja+66,+Narciso+Mendoza,+Tlalpan,+14390+CDMX,+Mexico&t=&z=16&ie=UTF8&iwloc=&output=embed"
                     className="w-full h-[180px] border-0 grayscale invert contrast-75 brightness-110 opacity-75"

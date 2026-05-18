@@ -25,6 +25,7 @@ export const viewport: Viewport = {
 
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { Chatbot } from "@/components/Chatbot";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -38,6 +39,22 @@ export default function RootLayout({
         outfit.variable,
         workSans.variable
       )}>
+        <Script id="media-query-shim" strategy="beforeInteractive">
+          {`
+            if (typeof window !== 'undefined') {
+              if (window.MediaQueryList && !window.MediaQueryList.prototype.addListener) {
+                window.MediaQueryList.prototype.addListener = function(cb) {
+                  this.addEventListener('change', cb);
+                };
+              }
+              if (window.MediaQueryList && !window.MediaQueryList.prototype.removeListener) {
+                window.MediaQueryList.prototype.removeListener = function(cb) {
+                  this.removeEventListener('change', cb);
+                };
+              }
+            }
+          `}
+        </Script>
         <GoogleAnalytics />
         <div className="overflow-x-hidden">{children}</div>
         <Chatbot />

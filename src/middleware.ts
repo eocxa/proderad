@@ -16,11 +16,15 @@ const publicRoutes = [
   "/api/whatsapp/webhook",
   "/api/webhooks/n8n",
   "/api/rentals",
+  "/api/appointments",
 ]
 
 function matchesPath(requestPath: string, configPath: string): boolean {
-  if (requestPath === configPath) return true
-  return requestPath.startsWith(configPath)
+  const normRequest = requestPath.endsWith('/') ? requestPath.slice(0, -1) : requestPath
+  const normConfig = configPath.endsWith('/') ? configPath.slice(0, -1) : configPath
+  
+  if (normRequest === normConfig) return true
+  return normRequest.startsWith(normConfig + '/')
 }
 
 export async function middleware(request: NextRequest) {

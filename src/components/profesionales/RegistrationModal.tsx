@@ -8,11 +8,41 @@ interface RegistrationModalProps {
 }
 
 export default function RegistrationModal({ isOpen, onClose }: RegistrationModalProps) {
-  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    cedula: "",
+    email: "",
+    phone: ""
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setError("");
+    
+    try {
+      const res = await fetch("/api/webhooks/n8n", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "professional_registration",
+          ...formData
+        }),
+      });
+      
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        setError("Error al enviar la solicitud. Intenta de nuevo.");
+      }
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,18 +77,36 @@ export default function RegistrationModal({ isOpen, onClose }: RegistrationModal
                     <p className="text-outline text-sm">Ingresa tus datos para iniciar el proceso de verificación.</p>
                   </div>
 
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-medium">
+                      {error}
+                    </div>
+                  )}
+
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold text-outline uppercase tracking-widest ml-1">Nombre(s)</label>
                         <div className="relative">
                           <User className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary" size={16} />
-                          <input required className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" placeholder="Ej. Alex" />
+                          <input 
+                            required 
+                            className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" 
+                            placeholder="Ej. Alex"
+                            value={formData.firstName}
+                            onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                          />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold text-outline uppercase tracking-widest ml-1">Apellidos</label>
-                        <input required className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" placeholder="Ej. Rivera" />
+                        <input 
+                          required 
+                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" 
+                          placeholder="Ej. Rivera"
+                          value={formData.lastName}
+                          onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                        />
                       </div>
                     </div>
 
@@ -66,7 +114,13 @@ export default function RegistrationModal({ isOpen, onClose }: RegistrationModal
                       <label className="text-[10px] font-bold text-outline uppercase tracking-widest ml-1">Cédula Profesional</label>
                       <div className="relative">
                         <Contact className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary" size={16} />
-                        <input required className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" placeholder="Número de registro" />
+                        <input 
+                          required 
+                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" 
+                          placeholder="Número de registro"
+                          value={formData.cedula}
+                          onChange={(e) => setFormData({...formData, cedula: e.target.value})}
+                        />
                       </div>
                     </div>
 
@@ -74,7 +128,14 @@ export default function RegistrationModal({ isOpen, onClose }: RegistrationModal
                       <label className="text-[10px] font-bold text-outline uppercase tracking-widest ml-1">Correo Electrónico</label>
                       <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary" size={16} />
-                        <input required type="email" className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" placeholder="doctor@ejemplo.com" />
+                        <input 
+                          required 
+                          type="email" 
+                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" 
+                          placeholder="doctor@ejemplo.com"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        />
                       </div>
                     </div>
 
@@ -82,12 +143,22 @@ export default function RegistrationModal({ isOpen, onClose }: RegistrationModal
                       <label className="text-[10px] font-bold text-outline uppercase tracking-widest ml-1">Teléfono de Contacto</label>
                       <div className="relative">
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary" size={16} />
-                        <input required className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" placeholder="+52 55..." />
+                        <input 
+                          required 
+                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all" 
+                          placeholder="+52 55..."
+                          value={formData.phone}
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        />
                       </div>
                     </div>
 
-                    <button type="submit" className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
-                      Enviar Solicitud
+                    <button 
+                      type="submit" 
+                      disabled={submitting}
+                      className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 disabled:opacity-50 flex items-center justify-center"
+                    >
+                      {submitting ? "Enviando..." : "Enviar Solicitud"}
                     </button>
                   </form>
                 </div>

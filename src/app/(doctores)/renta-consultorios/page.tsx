@@ -2,74 +2,49 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
-import { ChevronRight, Star, Wifi, ShieldCheck, Microscope, MapPin, Phone, Mail } from "lucide-react";
+import { ChevronRight, Star, Loader2 } from "lucide-react";
 import { MapSection } from "@/components/sections/Map";
 import RegistrationModal from "@/components/profesionales/RegistrationModal";
 import DemoModal from "@/components/profesionales/DemoModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import type { Office } from "@/types";
 
-const CATEGORIES = [
-  {
-    id: "general",
-    name: "General",
-    count: 12,
-    img: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    id: "fisioterapia",
-    name: "Fisioterapia",
-    count: 8,
-    img: "https://images.unsplash.com/photo-1576091160550-217359f4ecf8?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    id: "pediatric",
-    name: "Odontopediatría",
-    count: 5,
-    img: "https://images.unsplash.com/photo-1588776814222-2608d434af3e?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    id: "psicologia",
-    name: "Psicología",
-    count: 9,
-    img: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=400",
-  },
-];
+const TYPE_LABELS: Record<string, string> = {
+  "equipada-plus": "Equipada Plus",
+  "estandar": "Estándar",
+  "quirofano": "Quirófano",
+};
 
-const FEATURED = [
-  {
-    id: "1",
-    name: "Penthouse Clinic",
-    rating: 4.9,
-    reviews: 120,
-    price: 120,
-    tags: ["Rayos X 3D", "Esterilización Pro", "Parking"],
-    img: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800",
-    featured: true,
-    wifi: true,
-  },
-  {
-    id: "2",
-    name: "The Zen Studio",
-    price: 85,
-    tagline: "Certificado de Bioseguridad",
-    icon: ShieldCheck,
-    img: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    id: "3",
-    name: "TechHub Polanco",
-    price: 95,
-    tagline: "Microscopio quirúrgico",
-    icon: Microscope,
-    img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=400",
-  },
-];
+const PLACEHOLDER_IMGS: Record<string, string> = {
+  "equipada-plus": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=400",
+  "estandar": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=400",
+  "quirofano": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=400",
+};
 
 export default function Home() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
+  const [offices, setOffices] = useState<Office[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/offices')
+      .then(r => r.json())
+      .then(res => { if (res.success && res.data) setOffices(res.data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const categories = offices.length > 0 ? offices.map((o, i) => ({
+    id: o.id,
+    name: o.name,
+    type: TYPE_LABELS[o.type] || o.type,
+    price: o.price_per_hour,
+    img: o.photo_url || PLACEHOLDER_IMGS[o.type] || PLACEHOLDER_IMGS["estandar"],
+    equipment: o.equipment || [],
+  })) : [];
 
   return (
     <main className="bg-surface min-h-screen">
@@ -126,8 +101,11 @@ export default function Home() {
             </div>
           </div>
 
+          {loading ? (
+            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
+          ) : (
           <div className="flex gap-6 overflow-x-auto no-scrollbar pb-8 -mx-4 px-4 md:mx-0 md:px-0">
-            {CATEGORIES.map((cat, i) => (
+            {categories.map((cat, i) => (
               <motion.div
                 key={cat.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -150,10 +128,11 @@ export default function Home() {
                   <div className="absolute inset-0 bg-primary/20 group-hover:bg-primary/0 transition-colors" />
                 </div>
                 <h3 className="text-2xl font-bold text-primary mb-2">{cat.name}</h3>
-                <p className="text-outline font-medium text-sm">{cat.count} Espacios disponibles</p>
+                <p className="text-outline font-medium text-sm">{cat.type} · ${cat.price.toLocaleString('es-MX')}/hr</p>
               </motion.div>
             ))}
           </div>
+          )}
         </section>
 
         {/* Mosaic Listings */}
@@ -166,8 +145,11 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {CATEGORIES.map((cat, i) => (
+          {loading ? (
+            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
+          ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {categories.map((cat, i) => (
               <motion.div
                 key={cat.id}
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -188,7 +170,7 @@ export default function Home() {
                   </div>
                   <div className="p-8 flex-1 flex flex-col">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-primary tracking-tight">Consultorio {cat.name}</h3>
+                      <h3 className="text-xl font-bold text-primary tracking-tight">{cat.name}</h3>
                       <div className="flex items-center gap-1 text-secondary">
                         <Star size={14} fill="currentColor" />
                         <span className="text-xs font-bold">4.9</span>
@@ -196,7 +178,7 @@ export default function Home() {
                     </div>
                     <div className="mt-auto pt-6 border-t border-outline-variant/20 flex items-center justify-between">
                       <p className="text-primary font-bold">
-                        $120 <span className="text-xs font-normal text-outline">/ hora</span>
+                        ${cat.price.toLocaleString('es-MX')} <span className="text-xs font-normal text-outline">/ hora</span>
                       </p>
                       <button className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center group-hover:bg-secondary transition-colors">
                         <ChevronRight size={18} />
@@ -207,6 +189,7 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+          )}
         </section>
 
         {/* CTA / Membership Section */}
@@ -248,7 +231,7 @@ export default function Home() {
       <MapSection />
 
       <RegistrationModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
-      <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} categories={CATEGORIES} />
+      <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} offices={offices} />
       </div>
       <Footer />
     </main>
