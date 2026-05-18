@@ -30,15 +30,15 @@ export const BookingSystem = () => {
   };
 
   return (
-    <section id="citas" className="py-32 lg:py-40 bg-slate-50/30 scroll-mt-20 relative overflow-hidden">
+    <section id="citas" className="py-16 lg:py-40 bg-slate-50/30 scroll-mt-20 relative overflow-hidden">
       <div className="container mx-auto px-6 lg:px-12">
-        <div className="max-w-2xl mb-16 reveal">
+        <div className="max-w-2xl mb-8 lg:mb-16 reveal">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-[2px] bg-primary/60" />
             <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-primary/60">Agenda en línea</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit">
-            Reserva tu<span className="text-primary/15"> cita</span>
+            Reserva tu<span className="text-primary/60"> cita</span>
           </h2>
         </div>
 
@@ -74,9 +74,9 @@ export const BookingSystem = () => {
                         <span className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</span>
                         Selecciona el día
                       </h4>
-                      <div className="flex-1 overflow-x-auto">
-                      <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} locale={es} disabled={{ before: new Date() }} className="p-3 border rounded-2xl bg-white shadow-sm min-w-[280px] mx-auto" />
-                    </div>
+<div className="rdp-wrapper">
+                       <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} locale={es} disabled={{ before: new Date() }} className="rdp-compact" />
+                     </div>
                     </div>
                     <div className="flex-1">
                       <h4 className="font-outfit font-bold text-lg mb-6 flex items-center gap-3">

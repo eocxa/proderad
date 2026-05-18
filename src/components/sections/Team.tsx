@@ -20,16 +20,16 @@ export const Team = () => {
   }, []);
 
   return (
-    <section id="equipo" className="py-32 lg:py-40 bg-white relative overflow-hidden">
+    <section id="equipo" className="py-16 lg:py-40 bg-white relative overflow-hidden">
       <div className="container mx-auto px-6 lg:px-12">
-        <div className="max-w-2xl mb-20 reveal">
+        <div className="max-w-2xl mb-10 lg:mb-20 reveal">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-[2px] bg-primary/60" />
             <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-primary/60">Equipo médico</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit">
             Especialistas<br />
-            <span className="text-primary/15">certificados</span>
+            <span className="text-primary/60">certificados</span>
           </h2>
         </div>
 

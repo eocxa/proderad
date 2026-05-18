@@ -24,14 +24,14 @@ export const Services = () => {
   }, []);
 
   return (
-    <section id="servicios" className="py-32 lg:py-40 bg-white relative overflow-hidden">
+    <section id="servicios" className="py-16 lg:py-40 bg-white relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-[300px] lg:w-[600px] h-[300px] lg:h-[600px] border-[40px] lg:border-[80px] border-slate-50/50 rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[200px] lg:w-[400px] h-[200px] lg:h-[400px] border-[20px] lg:border-[40px] border-slate-50/30 rounded-full -translate-x-1/4 translate-y-1/4 pointer-events-none" />
 
       <div className="container mx-auto px-6 lg:px-12 relative">
         {/* Section header */}
-        <div className="flex flex-col lg:flex-row lg:items-end gap-6 mb-20">
+        <div className="flex flex-col lg:flex-row lg:items-end gap-4 mb-10 lg:mb-20">
           <div className="reveal flex-1">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-[2px] bg-secondary/60" />
@@ -39,7 +39,7 @@ export const Services = () => {
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit">
               Nuestros<br />
-              <span className="text-primary/15">servicios</span>
+              <span className="text-primary/60">servicios</span>
             </h2>
           </div>
           <div className="reveal lg:pb-4">
@@ -55,7 +55,7 @@ export const Services = () => {
             <div key={i} className={`reveal-scale group relative bg-white rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 border border-gray-50 hover:border-primary/5 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/20 ${i % 2 === 0 ? 'lg:translate-y-0' : 'lg:translate-y-6'}`}>
               {/* Number */}
               <div className="flex items-start justify-between mb-8">
-                <span className="font-outfit font-black text-3xl sm:text-5xl text-primary/[0.06] group-hover:text-primary/[0.12] transition-colors duration-500 select-none">
+                <span className="font-outfit font-black text-3xl sm:text-5xl text-primary/60 group-hover:text-primary/70 transition-colors duration-500 select-none">
                   {s.num}
                 </span>
                 <div className="w-12 h-12 rounded-2xl bg-slate-50 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-500 shadow-sm">

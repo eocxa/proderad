@@ -16,7 +16,7 @@ export const ProfessionalCTA = () => {
   }, []);
 
   return (
-    <section id="soy-profesional" className="py-20 bg-white">
+    <section id="soy-profesional" className="py-12 lg:py-20 bg-white">
       <div className="container mx-auto px-6 lg:px-12">
         <div className="reveal-scale">
           <Link href="/renta-consultorios" className="group relative block bg-gradient-to-br from-slate-50 to-slate-100 rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 lg:p-16 overflow-hidden hover:shadow-2xl hover:shadow-slate-200/30 transition-all duration-500">

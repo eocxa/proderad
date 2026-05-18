@@ -41,7 +41,7 @@ export const RentalBookingSystem = () => {
             <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-cta/60">Reserva de espacio</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit">
-            Solicitar<span className="text-cta/15"> renta</span>
+            Solicitar<span className="text-cta/60"> renta</span>
           </h2>
         </div>
 
@@ -79,9 +79,9 @@ export const RentalBookingSystem = () => {
                         <span className="w-8 h-8 rounded-xl bg-cta/10 text-cta flex items-center justify-center text-xs font-bold">1</span>
                         Fecha de renta
                       </h4>
-                      <div className="flex-1 overflow-x-auto">
-                      <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} locale={es} disabled={{ before: new Date() }} className="p-3 border rounded-2xl bg-white shadow-sm min-w-[280px] mx-auto" />
-                    </div>
+<div className="rdp-wrapper">
+                       <DayPicker mode="single" selected={selectedDate} onSelect={setSelectedDate} locale={es} disabled={{ before: new Date() }} className="rdp-compact" />
+                     </div>
                     </div>
                     <div className="flex-1">
                       <h4 className="font-outfit font-bold text-lg mb-6 flex items-center gap-3">

@@ -8,15 +8,15 @@ const cases = [
 
 export const Gallery = () => {
   return (
-    <section id="galeria" className="py-32 lg:py-40 bg-white overflow-hidden">
+    <section id="galeria" className="py-16 lg:py-40 bg-white overflow-hidden">
       <div className="container mx-auto px-6 lg:px-12">
-        <div className="max-w-xl mb-16 reveal">
+        <div className="max-w-xl mb-8 lg:mb-16 reveal">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-[2px] bg-secondary/60" />
             <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-secondary/60">Casos reales</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit">
-            Resultados que<span className="text-primary/15"> transforman</span>
+            Resultados que<span className="text-primary/60"> transforman</span>
           </h2>
         </div>
 

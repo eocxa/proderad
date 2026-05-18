@@ -61,7 +61,7 @@ export const Reviews = () => {
   }, []);
 
   return (
-    <section id="testimonios" className="bg-slate-50/30 py-12 lg:py-40 overflow-hidden">
+    <section id="testimonios" className="bg-slate-50/30 py-10 lg:py-40 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-12">
         <div className="flex flex-col lg:flex-row gap-5 lg:gap-24">
           <div className="lg:w-[380px] shrink-0">
@@ -71,7 +71,7 @@ export const Reviews = () => {
                 <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] sm:tracking-[0.4em] uppercase text-primary/60">Testimonios</span>
               </div>
               <h2 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit mb-3 lg:mb-10">
-                Lo que dicen<br /><span className="text-primary/15">nuestros</span> pacientes
+                Lo que dicen<br /><span className="text-primary/60">nuestros</span> pacientes
               </h2>
               <div className="flex items-center gap-3 sm:gap-5">
                 <div className="flex gap-0.5">
@@ -89,7 +89,7 @@ export const Reviews = () => {
             </div>
           </div>
 
-          <div className="reviews-clip h-[300px] sm:h-[550px] lg:h-[650px] flex gap-2 sm:gap-5 relative scroll-mask">
+          <div className="reviews-clip h-[450px] flex gap-2 sm:gap-5 relative scroll-mask">
             <div className="flex-1 min-w-0 will-change-transform animate-scroll-up">
               {[...col1, ...col1].map((r, i) => <Card key={`c1-${i}`} r={r} />)}
             </div>

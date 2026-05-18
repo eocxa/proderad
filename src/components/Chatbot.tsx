@@ -28,9 +28,19 @@ const KNOWLEDGE_BASE = {
 
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [currentState, setCurrentState] = useState<ChatState>('START');
   const [fallbackCount, setFallbackCount] = useState(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      const t = setTimeout(() => setShowChat(true), 50);
+      return () => clearTimeout(t);
+    } else {
+      setShowChat(false);
+    }
+  }, [isOpen]);
   const [messages, setMessages] = useState<Message[]>([
     { 
       role: 'bot', 
@@ -394,27 +404,39 @@ export const Chatbot = () => {
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center justify-center transition-transform duration-300 transform hover:scale-110 active:scale-95 relative z-10",
-          isOpen ? "w-16 h-16 rounded-full bg-white text-text-main shadow-2xl overflow-hidden group" : "w-[120px] bg-transparent outline-none border-none shadow-none"
+          "flex items-center justify-center relative z-10 overflow-hidden",
+          "transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+          "hover:scale-110 active:scale-95",
+          isOpen
+            ? "w-16 h-16 rounded-full bg-white text-text-main shadow-2xl shadow-primary/20"
+            : "w-[120px] h-auto bg-transparent outline-none border-none shadow-none"
         )}
       >
-        {isOpen ? (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <X className="w-8 h-8 relative z-10" />
-          </>
-        ) : (
+        <div className={cn(
+          "flex items-center justify-center w-full h-full transition-all duration-300",
+          isOpen ? "opacity-100 rotate-0" : "opacity-0 rotate-90 absolute inset-0"
+        )}>
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <X className="w-8 h-8 relative z-10" />
+        </div>
+        <div className={cn(
+          "flex items-center justify-center w-full h-full transition-all duration-300",
+          isOpen ? "opacity-0 -rotate-90 absolute inset-0" : "opacity-100 rotate-0"
+        )}>
           <img 
             src="/chatbot-icon.png" 
             alt="Abrir chat" 
             className="w-full h-auto drop-shadow-[0_10px_15px_rgba(0,0,0,0.2)] object-contain"
           />
-        )}
+        </div>
       </button>
 
       {/* Chat Window */}
-      {isOpen && (
-        <div className="absolute bottom-20 right-0 w-[calc(100vw-32px)] max-w-[420px] h-[600px] max-h-[calc(100vh-120px)] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-500">
+      {(isOpen || showChat) && (
+        <div className={cn(
+          "absolute bottom-20 right-0 w-[calc(100vw-32px)] max-w-[420px] h-[600px] max-h-[calc(100vh-120px)] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+          showChat ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4 pointer-events-none"
+        )}>
           {/* Header */}
           <div className="bg-gradient-to-br from-primary via-primary-dark to-secondary p-6 text-white relative">
             <div className="flex items-center gap-4">

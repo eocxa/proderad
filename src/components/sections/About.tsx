@@ -22,12 +22,12 @@ export const About = () => {
   }, []);
 
   return (
-    <section id="nosotros" className="py-32 lg:py-40 bg-slate-50/30 relative overflow-hidden">
+    <section id="nosotros" className="py-16 lg:py-40 bg-slate-50/30 relative overflow-hidden">
       {/* Diagonal gradient */}
       <div className="absolute inset-0 bg-gradient-to-tr from-primary/[0.02] via-transparent to-secondary/[0.02] pointer-events-none" />
 
       <div className="container mx-auto px-6 lg:px-12 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-20 lg:gap-32 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-10 lg:gap-32 items-center">
           {/* Left — Visual (hidden on mobile) */}
           <div className="hidden lg:block relative reveal-left">
             <div className="relative w-full max-w-sm mx-auto lg:mx-0">
@@ -64,14 +64,14 @@ export const About = () => {
             </div>
 
             <div className="reveal-right">
-            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit mb-8 lg:mb-10">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight font-outfit mb-4 lg:mb-10">
               Más de una década<br />
-              <span className="text-primary/15">cuidando</span> sonrisas
+              <span className="text-primary/60">cuidando</span> sonrisas
             </h2>
             </div>
 
             <div className="reveal-right">
-              <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-8 lg:mb-12 font-light max-w-lg">
+              <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6 lg:mb-12 font-light max-w-lg">
                 En ProDental combinamos experiencia clínica con tecnología de diagnóstico avanzada. Cada tratamiento se planifica con rigor científico y se ejecuta bajo estándares certificados por COFEPRIS.
               </p>
             </div>

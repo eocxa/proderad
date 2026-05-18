@@ -23,7 +23,7 @@ export const Hero = () => {
   }, []);
 
   return (
-    <section id="inicio" className="relative min-h-screen flex items-center bg-white overflow-hidden pt-20" ref={parallaxRef}>
+    <section id="inicio" className="relative flex items-center bg-white overflow-hidden pt-14 lg:pt-20" ref={parallaxRef}>
       {/* Decorative parallax shapes */}
       <div data-parallax="0.1" className="absolute top-0 right-0 w-[30vw] lg:w-[50vw] h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/50 -skew-x-3 translate-x-10 lg:translate-x-20 overflow-hidden" />
       <div data-parallax="0.3" className="hidden sm:block absolute top-24 right-[20vw] w-40 lg:w-80 h-40 lg:h-80 border-[2px] border-primary/[0.04] rounded-full" />
@@ -42,11 +42,11 @@ export const Hero = () => {
       </div>
 
       <div className="container mx-auto px-6 lg:px-12 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-0 items-center min-h-screen py-20">
-          {/* Left column */}
-          <div className="relative py-12 lg:py-20">
+<div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-0 items-center lg:min-h-screen py-4 lg:py-20">
+           {/* Left column */}
+           <div className="relative py-4 lg:py-20">
             <div className="reveal">
-              <div className="inline-flex items-center gap-4 mb-8">
+              <div className="inline-flex items-center gap-4 mb-4 lg:mb-8">
                 <div className="w-16 h-[1px] bg-primary/40" />
                 <span className="text-[11px] font-semibold tracking-[0.2em] sm:tracking-[0.4em] uppercase text-primary/60">Clínica dental certificada</span>
               </div>
@@ -77,7 +77,7 @@ export const Hero = () => {
               </p>
             </div>
 
-            <div className="reveal flex flex-wrap items-center gap-5 mt-10">
+            <div className="reveal flex flex-wrap items-center gap-5 mt-6 lg:mt-10">
               <Link href="#citas" className="group bg-primary text-white px-8 py-4 rounded-2xl font-semibold text-sm hover:bg-primary-dark transition-all duration-300 shadow-xl shadow-primary/10 hover:shadow-primary/20 inline-flex items-center gap-3 hover:gap-4">
                 Agendar consulta
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -88,7 +88,7 @@ export const Hero = () => {
             </div>
 
             {/* Stats row */}
-            <div className="reveal flex flex-wrap items-center gap-4 sm:gap-8 lg:gap-12 mt-10 lg:mt-14 pt-8 lg:pt-10 border-t border-gray-100">
+            <div className="reveal flex flex-wrap items-center gap-4 sm:gap-8 lg:gap-12 mt-6 lg:mt-14 pt-6 lg:pt-10 border-t border-gray-100">
               <div className="text-center lg:text-left min-w-0">
                 <div className="font-outfit font-black text-2xl sm:text-3xl lg:text-4xl text-primary">4.6</div>
                 <div className="text-[10px] sm:text-xs text-text-muted font-medium mt-1">Google Rating</div>
