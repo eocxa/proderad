@@ -16,6 +16,7 @@ export default function RegistrationModal({ isOpen, onClose }: RegistrationModal
     phone: ""
   });
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
