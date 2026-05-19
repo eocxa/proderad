@@ -1,5 +1,6 @@
 export type UserRole = "admin" | "super_admin"
 
+export type AppointmentStatus = "pending" | "confirmed" | "cancelled" | "completed"
 export type RentalStatus = "pending" | "approved" | "rejected" | "active" | "completed" | "cancelled"
 export type PaymentStatus = "pending" | "paid" | "refunded"
 export type Shift = "morning" | "afternoon" | "full"
@@ -88,6 +89,22 @@ export interface Rental {
   notes?: string | null
   admin_notes?: string | null
   approved_by?: string | null
+  created_at: string
+  updated_at: string
+  office?: Pick<Office, "name" | "type" | "floor">
+}
+
+export interface Appointment {
+  id: string
+  patient_name: string
+  patient_email: string
+  patient_phone?: string | null
+  service_category?: string | null
+  office_id?: string | null
+  appointment_date: string
+  appointment_time: string
+  status: AppointmentStatus
+  notes?: string | null
   created_at: string
   updated_at: string
 }

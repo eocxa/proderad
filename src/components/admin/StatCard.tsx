@@ -5,7 +5,7 @@ import React from "react";
 interface StatCardProps {
   title: string;
   value: string | number;
-  change: string;
+  change?: string;
   type: string;
   color: string;
   icon: React.ReactNode;
@@ -53,18 +53,20 @@ export function StatCard({ title, value, change, type, color, icon }: StatCardPr
         >
           {value}
         </h3>
-        <div className="flex items-center gap-1.5">
-          <span
-            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{
-              background: `rgba(${color === "#50d9fe" ? "80,217,254" : color === "#0f766e" ? "15,118,110" : color === "#10b981" ? "16,185,129" : "245,158,11"}, 0.08)`,
-              color: color,
-            }}
-          >
-            {change}
-          </span>
-          <span className="text-[10px] text-slate-500 font-medium">vs semana pasada</span>
-        </div>
+        {change && (
+          <div className="flex items-center gap-1.5">
+            <span
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              style={{
+                background: `rgba(${color === "#50d9fe" ? "80,217,254" : color === "#0f766e" ? "15,118,110" : color === "#10b981" ? "16,185,129" : "245,158,11"}, 0.08)`,
+                color: color,
+              }}
+            >
+              {change}
+            </span>
+            <span className="text-[10px] text-slate-500 font-medium">vs semana pasada</span>
+          </div>
+        )}
       </div>
 
       {/* Thin colored bottom border that glows on hover */}

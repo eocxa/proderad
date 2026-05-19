@@ -3,9 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const ADMIN_PASSWORD = "prodental2025";
-const SESSION_KEY = "prodental_admin_auth";
-
 export function AdminLogin() {
   const router = useRouter();
   const [password, setPassword] = useState("");
@@ -16,10 +13,11 @@ export function AdminLogin() {
 
   useEffect(() => {
     setMounted(true);
-    // Si ya hay sesión activa, redirigir al dashboard
-    if (sessionStorage.getItem(SESSION_KEY) === "true") {
-      router.replace("/admin/dashboard");
-    }
+    fetch("/api/auth/session", { credentials: "include" })
+      .then((res) => {
+        if (res.ok) router.replace("/admin/dashboard");
+      })
+      .catch(() => {});
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,16 +25,27 @@ export function AdminLogin() {
     setError("");
     setIsLoading(true);
 
-    // Simular delay de autenticación
-    await new Promise((res) => setTimeout(res, 800));
+    try {
+      const res = await fetch("/api/auth/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ password }),
+      });
 
-    if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "true");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error?.message || "Error al iniciar sesión");
+        setIsLoading(false);
+        setPassword("");
+        return;
+      }
+
       router.replace("/admin/dashboard");
-    } else {
-      setError("Contraseña incorrecta. Intenta de nuevo.");
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
       setIsLoading(false);
-      setPassword("");
     }
   };
 

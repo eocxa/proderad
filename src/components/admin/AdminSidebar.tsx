@@ -6,11 +6,20 @@ import { useRouter } from "next/navigation";
 interface AdminSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onLogout?: () => void;
 }
 
-export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
+export function AdminSidebar({ activeTab, setActiveTab, onLogout }: AdminSidebarProps) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false); // Para control en mobile
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      router.replace("/admin");
+    }
+  };
 
   const menuItems = [
     {
@@ -51,10 +60,7 @@ export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
     },
   ];
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("prodental_admin_auth");
-    router.replace("/admin");
-  };
+  
 
   return (
     <>

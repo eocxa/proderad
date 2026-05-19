@@ -7,6 +7,8 @@ const adminRoutes = [
   { path: "/api/offices", methods: ["POST", "PUT", "DELETE"] },
   { path: "/api/whatsapp", methods: ["GET"] },
   { path: "/api/webhooks/n8n", methods: ["GET"] },
+  { path: "/api/appointments", methods: ["GET", "PUT"] },
+  { path: "/api/services", methods: ["GET", "PUT"] },
 ]
 
 const publicRoutes = [
@@ -37,7 +39,7 @@ export async function middleware(request: NextRequest) {
 
   if (!pathname.startsWith("/api/")) return NextResponse.next()
 
-  if (pathname.startsWith("/api/google") || pathname.startsWith("/api/auth/google")) {
+  if (pathname.startsWith("/api/google") || pathname.startsWith("/api/auth")) {
     return NextResponse.next()
   }
 

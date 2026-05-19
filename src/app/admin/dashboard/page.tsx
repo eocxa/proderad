@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -9,27 +9,46 @@ import { ReservationsTable } from "@/components/admin/ReservationsTable";
 import { AppointmentsPanel } from "@/components/admin/AppointmentsPanel";
 import { AutomationsPanel } from "@/components/admin/AutomationsPanel";
 
-const SESSION_KEY = "prodental_admin_auth";
-
 export default function DashboardPage() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState("reservas"); // reservas, citas, servicios
+  const [authLoading, setAuthLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("reservas");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Datos mock iniciales para métricas y estado
-  const [reservasCount, setReservasCount] = useState(12);
-  const [citasCount, setCitasCount] = useState(8);
-  const [ingresos, setIngresos] = useState(48500);
+  const [reservasCount, setReservasCount] = useState(0);
+  const [citasCount, setCitasCount] = useState(0);
+  const [ingresos, setIngresos] = useState(0);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    } catch {}
+    router.replace("/admin");
+  }, [router]);
 
   useEffect(() => {
-    const auth = sessionStorage.getItem(SESSION_KEY);
-    if (auth !== "true") {
-      router.replace("/admin");
-    } else {
-      setAuthorized(true);
-    }
+    fetch("/api/auth/session", { credentials: "include" })
+      .then((res) => {
+        if (!res.ok) {
+          router.replace("/admin");
+          return;
+        }
+        setAuthorized(true);
+      })
+      .catch(() => {
+        router.replace("/admin");
+      })
+      .finally(() => setAuthLoading(false));
   }, [router]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#50d9fe]"></div>
+      </div>
+    );
+  }
 
   if (!authorized) {
     return (
@@ -42,7 +61,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#0a1628] text-slate-100 flex font-work-sans">
       {/* Sidebar */}
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen lg:pl-64 transition-all duration-300">
@@ -56,7 +75,6 @@ export default function DashboardPage() {
             <StatCard
               title="Citas de Pacientes"
               value={citasCount}
-              change="+2 hoy"
               type="citas"
               color="#50d9fe"
               icon={
@@ -68,7 +86,6 @@ export default function DashboardPage() {
             <StatCard
               title="Consultorios Rentados"
               value={reservasCount}
-              change="4 activos"
               type="reservas"
               color="#0f766e"
               icon={
@@ -80,7 +97,6 @@ export default function DashboardPage() {
             <StatCard
               title="Ingresos Estimados"
               value={`$${ingresos.toLocaleString()}`}
-              change="+15% este mes"
               type="revenue"
               color="#10b981"
               icon={
@@ -90,14 +106,13 @@ export default function DashboardPage() {
               }
             />
             <StatCard
-              title="Nuevos Profesionales"
-              value="8"
-              change="Este mes"
-              type="doctors"
+              title="Servicios Activos"
+              value={"—"}
+              type="servicios"
               color="#f59e0b"
               icon={
                 <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               }
             />
@@ -131,20 +146,63 @@ export default function DashboardPage() {
   );
 }
 
-// Subcomponente de Servicios en línea
 function ServicesPanel() {
-  const [services, setServices] = useState([
-    { id: 1, name: "Radiografía Panorámica", category: "Radiología", price: 650, active: true },
-    { id: 2, name: "Tomografía Computarizada Cone Beam", category: "Radiología", price: 2100, active: true },
-    { id: 3, name: "Limpieza Dental Ultrasonido", category: "Clínica", price: 800, active: true },
-    { id: 4, name: "Blanqueamiento Dental LED", category: "Clínica", price: 3200, active: true },
-    { id: 5, name: "Radiografía Cefalométrica", category: "Radiología", price: 650, active: false },
-    { id: 6, name: "Guardas Oclusales", category: "Clínica", price: 1800, active: true },
-  ]);
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const toggleActive = (id: number) => {
-    setServices(services.map(s => s.id === id ? { ...s, active: !s.active } : s));
+  useEffect(() => {
+    fetch("/api/services?include_inactive=true")
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.success) setServices(res.data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const toggleActive = async (id: string, currentActive: boolean) => {
+    setServices((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, is_active: !currentActive } : s))
+    );
+
+    try {
+      await fetch(`/api/services/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: !currentActive }),
+      });
+    } catch {
+      setServices((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, is_active: currentActive } : s))
+      );
+    }
   };
+
+  const categoryLabels: Record<string, string> = {
+    preventivo: "Preventivo",
+    ortodoncia: "Ortodoncia",
+    implantes: "Implantes",
+    endodoncia: "Endodoncia",
+    cirugia: "Cirugía",
+    estetica: "Estética",
+    radiologia: "Radiología",
+    pediatria: "Pediatría",
+    periodoncia: "Periodoncia",
+  };
+
+  const categoryColors: Record<string, { bg: string; text: string }> = {
+    radiologia: { bg: "rgba(80,217,254,0.1)", text: "#50d9fe" },
+    preventivo: { bg: "rgba(15,118,110,0.1)", text: "#0f766e" },
+  };
+
+  if (loading) {
+    return (
+      <div className="rounded-2xl border animate-pulse" style={{ background: "rgba(255, 255, 255, 0.03)", borderColor: "rgba(255,255,255,0.06)" }}>
+        <div className="p-6"><div className="h-6 bg-slate-800 rounded w-64 mb-2"></div><div className="h-4 bg-slate-800 rounded w-96"></div></div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1,2,3].map(i=><div key={i} className="h-32 bg-slate-800/50 rounded-xl"></div>)}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border" style={{ background: "rgba(255, 255, 255, 0.03)", borderColor: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)" }}>
@@ -157,48 +215,55 @@ function ServicesPanel() {
         </p>
       </div>
       <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className="p-5 rounded-xl border flex items-center justify-between transition-all duration-300 hover:scale-[1.02]"
-              style={{
-                background: "rgba(255, 255, 255, 0.02)",
-                borderColor: service.active ? "rgba(80,217,254,0.15)" : "rgba(255,255,255,0.04)",
-              }}
-            >
-              <div>
-                <span
-                  className="inline-block text-[10px] px-2 py-0.5 rounded-full mb-1 font-semibold"
+        {services.length === 0 ? (
+          <p className="text-center text-slate-500 py-8">No hay servicios configurados.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {services.map((service) => {
+              const colors = categoryColors[service.category] || categoryColors.preventivo;
+              return (
+                <div
+                  key={service.id}
+                  className="p-5 rounded-xl border flex items-center justify-between transition-all duration-300 hover:scale-[1.02]"
                   style={{
-                    background: service.category === "Radiología" ? "rgba(80,217,254,0.1)" : "rgba(15,118,110,0.1)",
-                    color: service.category === "Radiología" ? "#50d9fe" : "#0f766e",
+                    background: "rgba(255, 255, 255, 0.02)",
+                    borderColor: service.is_active ? "rgba(80,217,254,0.15)" : "rgba(255,255,255,0.04)",
                   }}
                 >
-                  {service.category}
-                </span>
-                <h3 className="font-semibold text-white text-sm">{service.name}</h3>
-                <p className="text-xs text-slate-400 mt-1">${service.price.toLocaleString()} MXN</p>
-              </div>
+                  <div>
+                    <span
+                      className="inline-block text-[10px] px-2 py-0.5 rounded-full mb-1 font-semibold"
+                      style={{
+                        background: colors.bg,
+                        color: colors.text,
+                      }}
+                    >
+                      {categoryLabels[service.category] || service.category}
+                    </span>
+                    <h3 className="font-semibold text-white text-sm">{service.name}</h3>
+                    <p className="text-xs text-slate-400 mt-1">${Number(service.price).toLocaleString()} MXN</p>
+                  </div>
 
-              {/* Toggle Switch */}
-              <button
-                onClick={() => toggleActive(service.id)}
-                className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                style={{
-                  background: service.active ? "#0f766e" : "rgba(255,255,255,0.1)",
-                }}
-              >
-                <span
-                  className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                  style={{
-                    transform: service.active ? "translateX(20px)" : "translateX(0px)",
-                  }}
-                />
-              </button>
-            </div>
-          ))}
-        </div>
+                  {/* Toggle Switch */}
+                  <button
+                    onClick={() => toggleActive(service.id, service.is_active)}
+                    className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    style={{
+                      background: service.is_active ? "#0f766e" : "rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <span
+                      className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      style={{
+                        transform: service.is_active ? "translateX(20px)" : "translateX(0px)",
+                      }}
+                    />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
